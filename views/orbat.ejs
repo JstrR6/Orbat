@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.4"></script>
     <style>
         .hot-bar {
             transition: background-color 0.3s ease;
@@ -35,9 +36,56 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-20">
-        <h1 class="text-3xl font-bold mb-4">ORBAT</h1>
-        <p>ORBAT content will be displayed here.</p>
+    <div class="container mx-auto px-4 pt-20">
+        <h1 class="text-3xl font-bold mb-6">ORBAT Viewer</h1>
+        
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <% function renderUnit(unit) { %>
+                <div class="mb-4">
+                    <h2 class="text-xl font-semibold"><%= unit.name %> (<%= unit.type %>)</h2>
+                    <div class="ml-4">
+                        <p>Commander: <%= leadership[unit.id]?.commander || 'Not assigned' %></p>
+                        <p>Deputy Commander: <%= leadership[unit.id]?.deputyCommander || 'Not assigned' %></p>
+                        <p>Senior Enlisted Leader: <%= leadership[unit.id]?.seniorEnlistedLeader || 'Not assigned' %></p>
+                        
+                        <!-- Leadership Update Form -->
+                        <form hx-post="/api/update-leadership" hx-swap="none" class="mt-2">
+                            <input type="hidden" name="unitId" value="<%= unit.id %>">
+                            <select name="position" class="mr-2 p-1 border rounded">
+                                <option value="commander">Commander</option>
+                                <option value="deputyCommander">Deputy Commander</option>
+                                <option value="seniorEnlistedLeader">Senior Enlisted Leader</option>
+                            </select>
+                            <input type="text" name="name" placeholder="New leader name" class="mr-2 p-1 border rounded">
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">
+                                Update
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <% if (unit.subordinates && unit.subordinates.length > 0) { %>
+                        <div class="ml-8">
+                            <% unit.subordinates.forEach(subUnit => { %>
+                                <% renderUnit(subUnit) %>
+                            <% }); %>
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
+
+            <% renderUnit(structure) %>
+        </div>
     </div>
+
+    <script>
+        document.body.addEventListener('htmx:afterRequest', function(event) {
+            if (event.detail.successful) {
+                alert('Leadership updated successfully');
+                location.reload(); // Reload the page to reflect changes
+            } else {
+                alert('Failed to update leadership');
+            }
+        });
+    </script>
 </body>
 </html>
