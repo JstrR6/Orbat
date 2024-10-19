@@ -1,5 +1,6 @@
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const dotenv = require('dotenv');
+const militaryRanks = require('./ranks');
 
 // Load environment variables
 dotenv.config();
@@ -13,16 +14,6 @@ const client = new Client({
   ],
 });
 
-// Define the military ranks
-const militaryRanks = [
-  'Private', 'Private First Class', 'Specialist', 'Corporal', 'Sergeant', 
-  'Staff Sergeant', 'Sergeant First Class', 'Master Sergeant', 'First Sergeant', 
-  'Sergeant Major', 'Command Sergeant Major', 'Sergeant Major of the Armed Forces', 
-  'Second Lieutenant', 'First Lieutenant', 'Captain', 'Major', 'Lieutenant Colonel', 
-  'Colonel', 'Brigadier General', 'Major General', 'Lieutenant General', 'General', 
-  'General of the Armed Forces'
-];
-
 // Function to get roles that match military ranks
 function getMilitaryRoles(guild) {
   return guild.roles.cache.filter(role => militaryRanks.includes(role.name));
@@ -30,7 +21,13 @@ function getMilitaryRoles(guild) {
 
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
-  console.log('Discord bot is ready!');
+  console.log(`Logged in as ${client.user.tag}!`);
+  
+  // Set the bot's activity
+  client.user.setPresence({
+    activities: [{ name: 'ORBAT Management', type: ActivityType.Playing }],
+    status: 'online',
+  });
 });
 
 // Listen for messages
@@ -61,5 +58,13 @@ client.on('messageCreate', async (message) => {
   }
 });
 
+// Error handling
+client.on('error', console.error);
+process.on('unhandledRejection', error => {
+  console.error('Unhandled promise rejection:', error);
+});
+
 // Login to Discord with your client's token
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN)
+  .then(() => console.log('Bot logged in successfully'))
+  .catch(error => console.error('Failed to log in:', error));
