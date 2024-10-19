@@ -23,12 +23,14 @@
             margin: 15px;
             background-color: #f9fafb;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            text-align: center;
         }
         .orbat-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 30px;
         }
         .level {
             display: flex;
@@ -40,7 +42,7 @@
             display: flex;
             justify-content: space-around;
             width: 100%;
-            gap: 20px;
+            gap: 40px;
         }
         .leader-line {
             opacity: 0.5;
@@ -74,15 +76,25 @@
         
         <div class="orbat-container space-y-8">
             <% function renderUnit(unit, level = 0) { %>
-                <div class="unit-box" id="<%= unit.id %>">
-                    <h2 class="text-lg font-semibold text-gray-700"><%= unit.name %></h2>
-                    <p class="text-sm text-gray-600"><%= unit.type %></p>
-                    <p class="text-xs text-gray-500">Commander: <%= leadership[unit.id]?.commander || 'Not assigned' %></p>
-                    <button onclick="showLeadershipForm('<%= unit.id %>')" class="mt-2 text-xs text-blue-600 hover:text-blue-800">Update Leadership</button>
+                <div class="level">
+                    <div class="unit-box" id="<%= unit.id %>">
+                        <h2 class="text-lg font-semibold text-gray-700"><%= unit.name %></h2>
+                        <p class="text-sm text-gray-600"><%= unit.type %></p>
+                        <p class="text-xs text-gray-500">Commander: <%= leadership[unit.id]?.commander || 'Not assigned' %></p>
+                        <button onclick="showLeadershipForm('<%= unit.id %>')" class="mt-2 text-xs text-blue-600 hover:text-blue-800">Update Leadership</button>
+                    </div>
                 </div>
                 <% if (unit.subordinates && unit.subordinates.length > 0) { %>
                     <div class="sub-units">
                         <% unit.subordinates.forEach(subUnit => { %>
+                            <div class="level">
+                                <div class="unit-box" id="<%= subUnit.id %>">
+                                    <h2 class="text-lg font-semibold text-gray-700"><%= subUnit.name %></h2>
+                                    <p class="text-sm text-gray-600"><%= subUnit.type %></p>
+                                    <p class="text-xs text-gray-500">Commander: <%= leadership[subUnit.id]?.commander || 'Not assigned' %></p>
+                                    <button onclick="showLeadershipForm('<%= subUnit.id %>')" class="mt-2 text-xs text-blue-600 hover:text-blue-800">Update Leadership</button>
+                                </div>
+                            </div>
                             <% renderUnit(subUnit, level + 1) %>
                         <% }); %>
                     </div>
@@ -140,19 +152,21 @@
             const units = document.querySelectorAll('.unit-box');
             units.forEach(unit => {
                 const parentId = unit.id;
-                const children = unit.nextElementSibling ? unit.nextElementSibling.children : [];
+                const children = unit.parentElement.nextElementSibling ? unit.parentElement.nextElementSibling.children : [];
                 Array.from(children).forEach(child => {
-                    new LeaderLine(
-                        document.getElementById(parentId),
-                        document.getElementById(child.id),
-                        {
-                            color: 'rgba(0, 0, 0, 0.3)',
-                            size: 2,
-                            path: 'fluid',
-                            startSocketGravity: [0, 50],
-                            endSocketGravity: [0, -50]
-                        }
-                    );
+                    if (child.id) {
+                        new LeaderLine(
+                            document.getElementById(parentId),
+                            document.getElementById(child.id),
+                            {
+                                color: 'rgba(0, 0, 0, 0.3)',
+                                size: 2,
+                                path: 'fluid',
+                                startSocketGravity: [0, 50],
+                                endSocketGravity: [0, -50]
+                            }
+                        );
+                    }
                 });
             });
         };
