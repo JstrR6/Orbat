@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { initializeDiscordBot } = require('./server');
+const militaryRanks = require('./ranks');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -19,9 +20,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Prepare ranks data for display
+const ranksForDisplay = militaryRanks.map(rank => ({
+  name: rank,
+  description: `Description for ${rank}` // You can add more detailed descriptions later
+}));
+
 // Routes
 app.get('/', (req, res) => {
   res.render('index', { title: 'ORBAT Viewer' });
+});
+
+app.get('/rank-structure', (req, res) => {
+  res.render('rankStructure', { ranks: ranksForDisplay });
 });
 
 app.get('/api/orbat', (req, res) => {
@@ -31,7 +42,7 @@ app.get('/api/orbat', (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server Started on: ${port}`);
+  console.log(`Web server running on http://localhost:${port}`);
 });
 
 // Handle graceful shutdown
