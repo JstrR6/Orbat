@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.3.0/alpine.js" integrity="sha512-nIwdJlD5/vHj23CbO2iHCXtsqzdTTx3e3uAmpTm4x2Y8xCIFyWu4cSIV8GaGe2UNVq86/1h9EgUZy7tn243qdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body class="bg-gray-100">
+    <div x-data="{ sidebarOpen: false }" class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div :class="{'block': sidebarOpen, 'hidden': !sidebarOpen}" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0">
+            <div class="flex items-center justify-center mt-8">
+                <div class="flex items-center">
+                    <span class="mx-2 text-2xl font-semibold text-white">ORBAT Viewer</span>
+                </div>
+            </div>
+
+            <nav class="mt-10">
+                <a class="flex items-center px-6 py-2 mt-4 text-gray-100 bg-gray-700 bg-opacity-25" href="/">
+                    <span class="mx-3">Dashboard</span>
+                </a>
+                <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" href="/units">
+                    <span class="mx-3">Units</span>
+                </a>
+                <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100" href="/personnel">
+                    <span class="mx-3">Personnel</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Header -->
+            <header class="flex items-center justify-between px-6 py-4 bg-white border-b-4 border-indigo-600">
+                <div class="flex items-center">
+                    <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 focus:outline-none lg:hidden">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 6H20M4 12H20M4 18H11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="flex items-center">
+                    <h2 class="text-lg font-medium">Welcome to ORBAT Viewer</h2>
+                </div>
+            </header>
+
+            <!-- Main content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200">
+                <div class="container px-6 py-8 mx-auto">
+                    <h3 class="text-3xl font-medium text-gray-700">Dashboard</h3>
+
+                    <div class="mt-8">
+                        <!-- ORBAT Structure -->
+                        <div class="flex flex-col mt-8">
+                            <div class="py-2 -my-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+                                <div class="inline-block min-w-full overflow-hidden align-middle border-b border-gray-200 shadow sm:rounded-lg">
+                                    <table class="min-w-full">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Unit</th>
+                                                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Type</th>
+                                                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Strength</th>
+                                                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white">
+                                            <!-- Sample data - replace with actual data from your backend -->
+                                            <tr>
+                                                <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
+                                                    <div class="flex items-center">
+                                                        <div class="ml-4">
+                                                            <div class="text-sm font-medium leading-5 text-gray-900">1st Infantry Division</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
+                                                    <div class="text-sm leading-5 text-gray-500">Infantry</div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
+                                                    <div class="text-sm leading-5 text-gray-500">10,000</div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
+                                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
+                                                </td>
+                                            </tr>
+                                            <!-- Add more rows as needed -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
