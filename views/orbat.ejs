@@ -149,21 +149,25 @@
             document.getElementById('formUnitId').value = unitId;
             document.getElementById('leadershipForm').style.display = 'block';
         }
-
+    
         function hideLeadershipForm() {
             document.getElementById('leadershipForm').style.display = 'none';
         }
-
+    
         function toggleDivisions(corpsId) {
             const divisionsElement = document.getElementById(`divisions-${corpsId}`);
-            divisionsElement.style.display = divisionsElement.style.display === 'none' ? 'block' : 'none';
+            if (divisionsElement) {
+                divisionsElement.style.display = divisionsElement.style.display === 'none' ? 'block' : 'none';
+            }
         }
-
+    
         function toggleSquadrons(divisionId) {
             const squadronsElement = document.getElementById(`squadrons-${divisionId}`);
-            squadronsElement.style.display = squadronsElement.style.display === 'none' ? 'block' : 'none';
+            if (squadronsElement) {
+                squadronsElement.style.display = squadronsElement.style.display === 'none' ? 'block' : 'none';
+            }
         }
-
+    
         document.body.addEventListener('htmx:afterRequest', function(event) {
             if (event.detail.successful) {
                 alert('Leadership updated successfully');
