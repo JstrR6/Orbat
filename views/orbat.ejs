@@ -65,6 +65,8 @@
                 <h2 class="text-lg font-semibold"><%= structure.name %></h2>
                 <p class="text-sm"><%= structure.type %></p>
                 <p class="text-xs">Commander: <%= leadership[structure.id]?.commander || 'Not assigned' %></p>
+                <p class="text-xs">Deputy Commander: <%= leadership[structure.id]?.deputyCommander || 'Not assigned' %></p>
+                <p class="text-xs">Senior Enlisted Leader: <%= leadership[structure.id]?.seniorEnlistedLeader || 'Not assigned' %></p>
                 <button onclick="showLeadershipForm('<%= structure.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
             </div>
 
@@ -75,6 +77,8 @@
                         <h3 class="text-md font-semibold"><%= corps.name %></h3>
                         <p class="text-sm"><%= corps.type %></p>
                         <p class="text-xs">Commander: <%= leadership[corps.id]?.commander || 'Not assigned' %></p>
+                        <p class="text-xs">Deputy Commander: <%= leadership[corps.id]?.deputyCommander || 'Not assigned' %></p>
+                        <p class="text-xs">Senior Enlisted Leader: <%= leadership[corps.id]?.seniorEnlistedLeader || 'Not assigned' %></p>
                         <button onclick="showLeadershipForm('<%= corps.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
                         <button onclick="toggleDivisions('<%= corps.id %>')" class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs">
                             Expand Divisions
@@ -87,6 +91,8 @@
                                     <h4 class="text-sm font-semibold"><%= division.name %></h4>
                                     <p class="text-xs"><%= division.type %></p>
                                     <p class="text-xs">Commander: <%= leadership[division.id]?.commander || 'Not assigned' %></p>
+                                    <p class="text-xs">Deputy Commander: <%= leadership[division.id]?.deputyCommander || 'Not assigned' %></p>
+                                    <p class="text-xs">Senior Enlisted Leader: <%= leadership[division.id]?.seniorEnlistedLeader || 'Not assigned' %></p>
                                     <button onclick="showLeadershipForm('<%= division.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
                                     <button onclick="toggleSquadrons('<%= division.id %>')" class="mt-1 bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-xs">
                                         Expand Squadrons
@@ -99,6 +105,8 @@
                                                 <h5 class="text-xs font-semibold"><%= squadron.name %></h5>
                                                 <p class="text-xs"><%= squadron.type %></p>
                                                 <p class="text-xs">Commander: <%= leadership[squadron.id]?.commander || 'Not assigned' %></p>
+                                                <p class="text-xs">Deputy Commander: <%= leadership[squadron.id]?.deputyCommander || 'Not assigned' %></p>
+                                                <p class="text-xs">Senior Enlisted Leader: <%= leadership[squadron.id]?.seniorEnlistedLeader || 'Not assigned' %></p>
                                                 <button onclick="showLeadershipForm('<%= squadron.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
                                             </div>
                                         <% }); %>
@@ -148,23 +156,11 @@
 
         function toggleDivisions(corpsId) {
             const divisionsElement = document.getElementById(`divisions-${corpsId}`);
-            const allDivisions = document.querySelectorAll('.divisions');
-            allDivisions.forEach(div => {
-                if (div.id !== `divisions-${corpsId}`) {
-                    div.style.display = 'none';
-                }
-            });
             divisionsElement.style.display = divisionsElement.style.display === 'none' ? 'block' : 'none';
         }
 
         function toggleSquadrons(divisionId) {
             const squadronsElement = document.getElementById(`squadrons-${divisionId}`);
-            const allSquadrons = document.querySelectorAll('.squadrons');
-            allSquadrons.forEach(sq => {
-                if (sq.id !== `squadrons-${divisionId}`) {
-                    sq.style.display = 'none';
-                }
-            });
             squadronsElement.style.display = squadronsElement.style.display === 'none' ? 'block' : 'none';
         }
 
