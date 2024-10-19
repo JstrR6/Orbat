@@ -38,14 +38,19 @@
     <div class="container mx-auto px-4 pt-20">
         <h1 class="text-3xl font-bold mb-6">Rank Structure</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <% ranks.forEach(rank => { %>
-                <div class="bg-white shadow rounded-lg p-4">
-                    <h2 class="text-xl font-semibold mb-2"><%= rank.name %></h2>
-                    <p class="text-gray-600"><%= rank.description %></p>
+        <% Object.entries(ranks).forEach(([category, categoryRanks]) => { %>
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4"><%= category %></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <% categoryRanks.forEach(rank => { %>
+                        <div class="bg-white shadow rounded-lg p-4">
+                            <h3 class="text-xl font-semibold mb-2"><%= rank.name %></h3>
+                            <p class="text-gray-600"><%= rank.description %></p>
+                        </div>
+                    <% }); %>
                 </div>
-            <% }); %>
-        </div>
+            </div>
+        <% }); %>
     </div>
 </body>
 </html>
