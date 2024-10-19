@@ -6,8 +6,36 @@
     <title><%= title %></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.3.0/alpine.js" integrity="sha512-nIwdJlD5/vHj23CbO2iHCXtsqzdTTx3e3uAmpTm4x2Y8xCIFyWu4cSIV8GaGe2UNVq86/1h9EgUZy7tn243qdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        .hot-bar {
+            transition: background-color 0.3s ease;
+        }
+        .hot-bar:hover {
+            background-color: rgba(107, 114, 128, 0.3); /* gray-500 with 30% opacity */
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
+    <!-- Hot Bar -->
+    <div class="fixed top-0 left-0 right-0 z-50">
+        <div class="hot-bar flex justify-center items-center h-16 px-4">
+            <div class="flex space-x-4">
+                <button class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                    Rank Structure
+                </button>
+                <button class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                    ORBAT
+                </button>
+                <button class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                    Forms
+                </button>
+                <button class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
+                    Orders By The General
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div x-data="{ sidebarOpen: false }" class="flex h-screen bg-gray-100">
         <!-- Sidebar -->
         <div :class="{'block': sidebarOpen, 'hidden': !sidebarOpen}" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0">
@@ -52,45 +80,7 @@
                     <h3 class="text-3xl font-medium text-gray-700">Dashboard</h3>
 
                     <div class="mt-8">
-                        <!-- ORBAT Structure -->
-                        <div class="flex flex-col mt-8">
-                            <div class="py-2 -my-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                                <div class="inline-block min-w-full overflow-hidden align-middle border-b border-gray-200 shadow sm:rounded-lg">
-                                    <table class="min-w-full">
-                                        <thead>
-                                            <tr>
-                                                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Unit</th>
-                                                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Type</th>
-                                                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Strength</th>
-                                                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="bg-white">
-                                            <!-- Sample data - replace with actual data from your backend -->
-                                            <tr>
-                                                <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                    <div class="flex items-center">
-                                                        <div class="ml-4">
-                                                            <div class="text-sm font-medium leading-5 text-gray-900">1st Infantry Division</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                    <div class="text-sm leading-5 text-gray-500">Infantry</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                    <div class="text-sm leading-5 text-gray-500">10,000</div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                    <span class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
-                                                </td>
-                                            </tr>
-                                            <!-- Add more rows as needed -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Your main content goes here -->
                     </div>
                 </div>
             </main>
