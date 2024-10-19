@@ -20,19 +20,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Prepare ranks data for display
-const ranksForDisplay = militaryRanks.map(rank => ({
-  name: rank,
-  description: `Description for ${rank}` // You can add more detailed descriptions later
-}));
-
 // Routes
 app.get('/', (req, res) => {
   res.render('index', { title: 'ORBAT Viewer' });
 });
 
 app.get('/rank-structure', (req, res) => {
-  res.render('rankStructure', { title: 'Rank Structure', ranks: ranksForDisplay });
+  res.render('rankStructure', { title: 'Rank Structure', ranks: militaryRanks });
 });
 
 app.get('/orbat', (req, res) => {
@@ -54,13 +48,14 @@ app.get('/api/orbat', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).render('error', { title: 'Error', message: 'Something went wrong!' });
+  console.error('Error details:', err);
+  console.error('Error stack:', err.stack);
+  res.status(500).send(`Something went wrong! Error: ${err.message}`);
 });
 
 // 404 handler
 app.use((req, res, next) => {
-  res.status(404).render('error', { title: '404 Not Found', message: "Sorry, we couldn't find that page." });
+  res.status(404).send("Sorry, can't find that!");
 });
 
 // Start the server
