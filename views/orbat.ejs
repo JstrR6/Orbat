@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORBAT Viewer</title>
+    <title><%= title %></title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.4"></script>
     <style>
         .hot-bar {
-            background-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             transition: background-color 0.3s ease;
         }
         .hot-bar:hover {
@@ -16,236 +15,168 @@
         }
         .unit-box {
             border: 2px solid #4a5568;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px;
-            background-color: #f9fafb;
-            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px;
+            background-color: #ffffff;
         }
         .orbat-container {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        .level {
+        .corps-container {
             display: flex;
-            justify-content: center;
-            margin-top: 20px;
+            justify-content: space-around;
+            width: 100%;
         }
-        .level .unit-box {
-            margin: 0 20px;
-            width: 250px;
-        }
-        .expanded-content {
+        .divisions, .squadrons {
             display: none;
-            margin-top: 20px;
-        }
-        .unit-box-expanded {
-            display: block;
         }
     </style>
 </head>
 <body class="bg-gray-100">
-
     <!-- Hot Bar -->
-    <div class="fixed top-0 left-0 right-0 z-50 bg-white bg-opacity-80 shadow-md">
+    <div class="fixed top-0 left-0 right-0 z-50">
         <div class="hot-bar flex justify-center items-center h-16 px-4">
             <div class="flex space-x-4">
-                <a href="/rank-structure" class="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
+                <a href="/rank-structure" class="text-black hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                     Rank Structure
                 </a>
-                <a href="/orbat" class="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
+                <a href="/orbat" class="text-black hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                     ORBAT
                 </a>
-                <a href="/forms" class="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
+                <a href="/forms" class="text-black hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                     Forms
                 </a>
-                <a href="/orders" class="text-gray-800 hover:text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
+                <a href="/orders" class="text-black hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                     Orders By The General
                 </a>
             </div>
         </div>
     </div>
 
-    <div class="orbat-container pt-24">
-        <!-- 1st Army -->
-        <div class="unit-box" id="army">
-            <h2 class="text-xl font-bold">1st Army</h2>
-        </div>
+    <div class="container mx-auto px-4 pt-20">
+        <h1 class="text-3xl font-bold mb-6 text-center">ORBAT Viewer</h1>
+        
+        <div class="orbat-container">
+            <!-- 1st Army -->
+            <div class="unit-box" id="<%= structure.id %>">
+                <h2 class="text-lg font-semibold"><%= structure.name %></h2>
+                <p class="text-sm"><%= structure.type %></p>
+                <p class="text-xs">Commander: <%= leadership[structure.id]?.commander || 'Not assigned' %></p>
+                <button onclick="showLeadershipForm('<%= structure.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
+            </div>
 
-        <!-- Corps Level -->
-        <div class="level" id="corps-level">
-            <div class="unit-box" id="corps1">
-                <h2 class="text-lg font-bold">11th Infantry Corps</h2>
-                <button onclick="toggleExpand('corps1-expand')">Expand</button>
-            </div>
-            <div class="unit-box" id="corps2">
-                <h2 class="text-lg font-bold">12th Airborne Corps</h2>
-                <button onclick="toggleExpand('corps2-expand')">Expand</button>
-            </div>
-            <div class="unit-box" id="corps3">
-                <h2 class="text-lg font-bold">13th Armored Corps</h2>
-                <button onclick="toggleExpand('corps3-expand')">Expand</button>
-            </div>
-        </div>
+            <!-- Corps -->
+            <div class="corps-container">
+                <% structure.subordinates.forEach(corps => { %>
+                    <div class="unit-box">
+                        <h3 class="text-md font-semibold"><%= corps.name %></h3>
+                        <p class="text-sm"><%= corps.type %></p>
+                        <p class="text-xs">Commander: <%= leadership[corps.id]?.commander || 'Not assigned' %></p>
+                        <button onclick="showLeadershipForm('<%= corps.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
+                        <button onclick="toggleDivisions('<%= corps.id %>')" class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs">
+                            Expand Divisions
+                        </button>
 
-        <!-- Expanded Content for Corps 1 -->
-        <div class="expanded-content" id="corps1-expand">
-            <div class="level">
-                <div class="unit-box">
-                    <h2 class="text-md font-semibold">101st Infantry Division</h2>
-                    <button onclick="toggleExpand('division1-1-expand')">Expand Squadrons</button>
-                    <div class="expanded-content" id="division1-1-expand">
-                        <div class="level">
-                            <div class="unit-box">
-                                <h3 class="text-sm">111th Infantry Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">112th Infantry Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">113th Support Squadron</h3>
-                            </div>
+                        <!-- Divisions -->
+                        <div id="divisions-<%= corps.id %>" class="divisions mt-4">
+                            <% corps.subordinates.forEach(division => { %>
+                                <div class="unit-box mt-2">
+                                    <h4 class="text-sm font-semibold"><%= division.name %></h4>
+                                    <p class="text-xs"><%= division.type %></p>
+                                    <p class="text-xs">Commander: <%= leadership[division.id]?.commander || 'Not assigned' %></p>
+                                    <button onclick="showLeadershipForm('<%= division.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
+                                    <button onclick="toggleSquadrons('<%= division.id %>')" class="mt-1 bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-xs">
+                                        Expand Squadrons
+                                    </button>
+
+                                    <!-- Squadrons -->
+                                    <div id="squadrons-<%= division.id %>" class="squadrons mt-2">
+                                        <% division.subordinates.forEach(squadron => { %>
+                                            <div class="unit-box mt-1">
+                                                <h5 class="text-xs font-semibold"><%= squadron.name %></h5>
+                                                <p class="text-xs"><%= squadron.type %></p>
+                                                <p class="text-xs">Commander: <%= leadership[squadron.id]?.commander || 'Not assigned' %></p>
+                                                <button onclick="showLeadershipForm('<%= squadron.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% }); %>
                         </div>
                     </div>
-                </div>
-                <div class="unit-box">
-                    <h2 class="text-md font-semibold">102nd Armored Division</h2>
-                    <button onclick="toggleExpand('division1-2-expand')">Expand Squadrons</button>
-                    <div class="expanded-content" id="division1-2-expand">
-                        <div class="level">
-                            <div class="unit-box">
-                                <h3 class="text-sm">121st Armored Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">122nd Armored Squadron</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="unit-box">
-                    <h2 class="text-md font-semibold">103rd Artillery Division</h2>
-                    <button onclick="toggleExpand('division1-3-expand')">Expand Squadrons</button>
-                    <div class="expanded-content" id="division1-3-expand">
-                        <div class="level">
-                            <div class="unit-box">
-                                <h3 class="text-sm">131st Artillery Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">132nd Rocket Artillery Squadron</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <% }); %>
             </div>
         </div>
 
-        <!-- Expanded Content for Corps 2 -->
-        <div class="expanded-content" id="corps2-expand">
-            <div class="level">
-                <div class="unit-box">
-                    <h2 class="text-md font-semibold">201st Airborne Division</h2>
-                    <button onclick="toggleExpand('division2-1-expand')">Expand Squadrons</button>
-                    <div class="expanded-content" id="division2-1-expand">
-                        <div class="level">
-                            <div class="unit-box">
-                                <h3 class="text-sm">211th Airborne Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">212th Recon Squadron</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="unit-box">
-                    <h2 class="text-md font-semibold">202nd Air Assault Division</h2>
-                    <button onclick="toggleExpand('division2-2-expand')">Expand Squadrons</button>
-                    <div class="expanded-content" id="division2-2-expand">
-                        <div class="level">
-                            <div class="unit-box">
-                                <h3 class="text-sm">221st Helicopter Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">222nd Air Assault Squadron</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="unit-box">
-                    <h2 class="text-md font-semibold">203rd Aviation Division</h2>
-                    <button onclick="toggleExpand('division2-3-expand')">Expand Squadrons</button>
-                    <div class="expanded-content" id="division2-3-expand">
-                        <div class="level">
-                            <div class="unit-box">
-                                <h3 class="text-sm">231st UAV Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">232nd Fixed-Wing Squadron</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Expanded Content for Corps 3 -->
-        <div class="expanded-content" id="corps3-expand">
-            <div class="level">
-                <div class="unit-box">
-                    <h2 class="text-md font-semibold">301st Armored Division</h2>
-                    <button onclick="toggleExpand('division3-1-expand')">Expand Squadrons</button>
-                    <div class="expanded-content" id="division3-1-expand">
-                        <div class="level">
-                            <div class="unit-box">
-                                <h3 class="text-sm">311th Heavy Armored Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">312th Light Armored Squadron</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="unit-box">
-                    <h2 class="text-md font-semibold">302nd Mechanized Division</h2>
-                    <button onclick="toggleExpand('division3-2-expand')">Expand Squadrons</button>
-                    <div class="expanded-content" id="division3-2-expand">
-                        <div class="level">
-                            <div class="unit-box">
-                                <h3 class="text-sm">321st Mechanized Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">322nd Recon Squadron</h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="unit-box">
-                    <h2 class="text-md font-semibold">303rd Armored Artillery Division</h2>
-                    <button onclick="toggleExpand('division3-3-expand')">Expand Squadrons</button>
-                    <div class="expanded-content" id="division3-3-expand">
-                        <div class="level">
-                            <div class="unit-box">
-                                <h3 class="text-sm">331st Artillery Squadron</h3>
-                            </div>
-                            <div class="unit-box">
-                                <h3 class="text-sm">332nd Rocket Artillery Squadron</h3>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Leadership Update Form (Hidden by default) -->
+        <div id="leadershipForm" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" style="display: none;">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3 text-center">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Update Leadership</h3>
+                    <form id="updateLeadershipForm" hx-post="/api/update-leadership" hx-swap="none" class="mt-2">
+                        <input type="hidden" id="formUnitId" name="unitId" value="">
+                        <select name="position" class="mt-2 p-2 w-full border rounded">
+                            <option value="commander">Commander</option>
+                            <option value="deputyCommander">Deputy Commander</option>
+                            <option value="seniorEnlistedLeader">Senior Enlisted Leader</option>
+                        </select>
+                        <input type="text" name="name" placeholder="New leader name" class="mt-2 p-2 w-full border rounded">
+                        <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Update
+                        </button>
+                    </form>
+                    <button onclick="hideLeadershipForm()" class="mt-4 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        Close
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleExpand(sectionId) {
-            var selectedContent = document.getElementById(sectionId);
-            if (selectedContent.style.display === 'block') {
-                selectedContent.style.display = 'none';
-            } else {
-                selectedContent.style.display = 'block';
-            }
+        function showLeadershipForm(unitId) {
+            document.getElementById('formUnitId').value = unitId;
+            document.getElementById('leadershipForm').style.display = 'block';
         }
+
+        function hideLeadershipForm() {
+            document.getElementById('leadershipForm').style.display = 'none';
+        }
+
+        function toggleDivisions(corpsId) {
+            const divisionsElement = document.getElementById(`divisions-${corpsId}`);
+            const allDivisions = document.querySelectorAll('.divisions');
+            allDivisions.forEach(div => {
+                if (div.id !== `divisions-${corpsId}`) {
+                    div.style.display = 'none';
+                }
+            });
+            divisionsElement.style.display = divisionsElement.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleSquadrons(divisionId) {
+            const squadronsElement = document.getElementById(`squadrons-${divisionId}`);
+            const allSquadrons = document.querySelectorAll('.squadrons');
+            allSquadrons.forEach(sq => {
+                if (sq.id !== `squadrons-${divisionId}`) {
+                    sq.style.display = 'none';
+                }
+            });
+            squadronsElement.style.display = squadronsElement.style.display === 'none' ? 'block' : 'none';
+        }
+
+        document.body.addEventListener('htmx:afterRequest', function(event) {
+            if (event.detail.successful) {
+                alert('Leadership updated successfully');
+                hideLeadershipForm();
+                location.reload(); // Reload the page to reflect changes
+            } else {
+                alert('Failed to update leadership');
+            }
+        });
     </script>
 </body>
 </html>
