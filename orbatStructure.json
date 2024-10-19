@@ -29,6 +29,196 @@
                 "type": "Squadron"
               }
             ]
+          },
+          {
+            "id": "102nd_armored_division",
+            "name": "102nd Armored Division",
+            "type": "Division",
+            "subordinates": [
+              {
+                "id": "121st_armored_squadron",
+                "name": "121st Armored Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "122nd_armored_squadron",
+                "name": "122nd Armored Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "123rd_cavalry_squadron",
+                "name": "123rd Cavalry Squadron",
+                "type": "Squadron"
+              }
+            ]
+          },
+          {
+            "id": "103rd_artillery_division",
+            "name": "103rd Artillery Division",
+            "type": "Division",
+            "subordinates": [
+              {
+                "id": "131st_artillery_squadron",
+                "name": "131st Artillery Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "132nd_rocket_artillery_squadron",
+                "name": "132nd Rocket Artillery Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "133rd_artillery_support_squadron",
+                "name": "133rd Artillery Support Squadron",
+                "type": "Squadron"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "12th_airborne_corps",
+        "name": "12th Airborne Corps",
+        "type": "Corps",
+        "subordinates": [
+          {
+            "id": "201st_airborne_division",
+            "name": "201st Airborne Division",
+            "type": "Division",
+            "subordinates": [
+              {
+                "id": "211th_parachute_infantry_squadron",
+                "name": "211th Parachute Infantry Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "212th_parachute_infantry_squadron",
+                "name": "212th Parachute Infantry Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "213th_airborne_reconnaissance_squadron",
+                "name": "213th Airborne Reconnaissance Squadron",
+                "type": "Squadron"
+              }
+            ]
+          },
+          {
+            "id": "202nd_air_assault_division",
+            "name": "202nd Air Assault Division",
+            "type": "Division",
+            "subordinates": [
+              {
+                "id": "221st_air_assault_squadron",
+                "name": "221st Air Assault Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "222nd_air_assault_squadron",
+                "name": "222nd Air Assault Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "223rd_helicopter_assault_squadron",
+                "name": "223rd Helicopter Assault Squadron",
+                "type": "Squadron"
+              }
+            ]
+          },
+          {
+            "id": "203rd_aviation_division",
+            "name": "203rd Aviation Division",
+            "type": "Division",
+            "subordinates": [
+              {
+                "id": "231st_helicopter_squadron",
+                "name": "231st Helicopter Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "232nd_fixed_wing_squadron",
+                "name": "232nd Fixed-Wing Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "233rd_uav_squadron",
+                "name": "233rd UAV Squadron",
+                "type": "Squadron"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "13th_armored_corps",
+        "name": "13th Armored Corps",
+        "type": "Corps",
+        "subordinates": [
+          {
+            "id": "301st_armored_division",
+            "name": "301st Armored Division",
+            "type": "Division",
+            "subordinates": [
+              {
+                "id": "311th_heavy_armored_squadron",
+                "name": "311th Heavy Armored Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "312th_light_armored_squadron",
+                "name": "312th Light Armored Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "313th_cavalry_squadron",
+                "name": "313th Cavalry Squadron",
+                "type": "Squadron"
+              }
+            ]
+          },
+          {
+            "id": "302nd_mechanized_division",
+            "name": "302nd Mechanized Division",
+            "type": "Division",
+            "subordinates": [
+              {
+                "id": "321st_mechanized_infantry_squadron",
+                "name": "321st Mechanized Infantry Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "322nd_mechanized_support_squadron",
+                "name": "322nd Mechanized Support Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "323rd_mechanized_reconnaissance_squadron",
+                "name": "323rd Mechanized Reconnaissance Squadron",
+                "type": "Squadron"
+              }
+            ]
+          },
+          {
+            "id": "303rd_armored_artillery_division",
+            "name": "303rd Armored Artillery Division",
+            "type": "Division",
+            "subordinates": [
+              {
+                "id": "331st_self_propelled_artillery_squadron",
+                "name": "331st Self-Propelled Artillery Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "332nd_armored_artillery_squadron",
+                "name": "332nd Armored Artillery Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "333rd_armored_support_squadron",
+                "name": "333rd Armored Support Squadron",
+                "type": "Squadron"
+              }
+            ]
           }
         ]
       }
