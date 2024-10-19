@@ -1,12 +1,12 @@
 const express = require('express');
 const path = require('path');
-const dotenv = require('dotenv');
-
-// Load environment variables
-dotenv.config();
+const { initializeDiscordBot } = require('./server');
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Initialize Discord Bot
+const discordClient = initializeDiscordBot();
 
 // Middleware
 app.use(express.json());
@@ -31,5 +31,12 @@ app.get('/api/orbat', (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Web server running on http://localhost:${port}`);
+  console.log(`Server Started on: ${port}`);
+});
+
+// Handle graceful shutdown
+process.on('SIGINT', () => {
+  console.log('Application is shutting down...');
+  discordClient.destroy();
+  process.exit(0);
 });

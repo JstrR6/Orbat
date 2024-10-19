@@ -1,45 +1,46 @@
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
-const dotenv = require('dotenv');
 
-// Load environment variables
-dotenv.config();
+function initializeDiscordBot() {
+  console.log('Starting bot...');
 
-// Create a new client instance
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
-});
-
-// When the client is ready, run this code (only once)
-client.once('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-  
-  // Set the bot's activity
-  client.user.setPresence({
-    activities: [{ name: 'ORBAT Management', type: ActivityType.Playing }],
-    status: 'online',
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+    ],
   });
-});
 
-// Basic message listener (placeholder for future command handling)
-client.on('messageCreate', async (message) => {
-  if (message.author.bot) return;
-  
-  if (message.content === '!ping') {
-    await message.reply('Pong!');
-  }
-});
+  client.once('ready', () => {
+    console.log(`Logged in as ${client.user.tag}!`);
+    
+    client.user.setPresence({
+      activities: [{ name: 'ORBAT Management', type: ActivityType.Playing }],
+      status: 'online',
+    });
+  });
 
-// Error handling
-client.on('error', console.error);
-process.on('unhandledRejection', error => {
-  console.error('Unhandled promise rejection:', error);
-});
+  client.on('messageCreate', async (message) => {
+    if (message.author.bot) return;
+    
+    if (message.content === '!ping') {
+      await message.reply('Pong!');
+    }
+  });
 
-// Login to Discord with your client's token
-client.login(process.env.DISCORD_TOKEN)
-  .then(() => console.log('Bot logged in successfully'))
-  .catch(error => console.error('Failed to log in:', error));
+  client.on('error', error => {
+    console.error('Discord client error:', error);
+  });
+
+  console.log('Attempting to log in...');
+  client.login(process.env.DISCORD_TOKEN)
+    .then(() => console.log('Bot logged in successfully'))
+    .catch(error => {
+      console.error('Failed to log in:', error);
+      console.log('DISCORD_TOKEN:', process.env.DISCORD_TOKEN ? 'Token is set' : 'Token is not set');
+    });
+
+  return client;
+}
+
+module.exports = { initializeDiscordBot };
