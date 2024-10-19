@@ -35,6 +35,21 @@ app.get('/rank-structure', (req, res) => {
   res.render('rankStructure', { ranks: ranksForDisplay });
 });
 
+app.get('/orbat', (req, res) => {
+  // TODO: Implement ORBAT page
+  res.send('ORBAT page - Coming soon');
+});
+
+app.get('/forms', (req, res) => {
+  // TODO: Implement Forms page
+  res.send('Forms page - Coming soon');
+});
+
+app.get('/orders', (req, res) => {
+  // TODO: Implement Orders page
+  res.send('Orders By The General page - Coming soon');
+});
+
 app.get('/api/orbat', (req, res) => {
   // TODO: Implement ORBAT data retrieval
   res.json({ message: 'ORBAT data will be served here' });
