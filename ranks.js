@@ -2,105 +2,105 @@ const militaryRanks = {
   "General Officer": [
     {
       name: "General of the Armed Forces",
-      description: "Highest possible rank, only in times of war"
+      description: "Commander of the Armed Forces"
     },
     {
       name: "General",
-      description: "Most senior general officer rank, army commander"
+      description: "Corps Commander"
     },
     {
       name: "Lieutenant General",
-      description: "Corps commander or very senior staff officer"
+      description: "Corps Deputy Commander"
     },
     {
       name: "Major General",
-      description: "Division commander or senior staff officer"
+      description: "Division Commander"
     },
     {
       name: "Brigadier General",
-      description: "Lowest general officer rank, often commands a brigade"
+      description: "Division Deputy Commander"
     }
   ],
   "Company Grade Officer": [
     {
       name: "Colonel",
-      description: "Brigade commander or senior staff officer"
+      description: "Company Commander"
     },
     {
       name: "Lieutenant Colonel",
-      description: "Battalion commander or senior staff officer"
+      description: "Company Deputy Commander"
     },
     {
       name: "Major",
-      description: "Battalion executive officer or staff officer"
+      description: "Company First Officer or Squadron Commander"
     }
   ],
   "Squadron Grade Officer": [
     {
       name: "Captain",
-      description: "Company commander or staff officer"
+      description: "Squadron Commander"
     },
     {
       name: "First Lieutenant",
-      description: "Company executive officer or platoon leader"
+      description: "Squadron Deputy Commander"
     },
     {
       name: "Second Lieutenant",
-      description: "Entry-level commissioned officer"
+      description: "Squadron First Officer"
     }
   ],
   "Senior Non-Commissioned Officer": [
     {
       name: "Sergeant Major of the Armed Forces",
-      description: "Most senior enlisted member of the armed forces"
+      description: "Senior Enlisted Leader of the Armed Forces"
     },
     {
       name: "Command Sergeant Major",
-      description: "Senior enlisted advisor to the commanding officer"
+      description: "Company Senior Enlisted Leader"
     },
     {
       name: "Sergeant Major",
-      description: "Most senior non-commissioned officer rank"
+      description: "Squadron Senior Enlisted Leader"
     },
     {
       name: "First Sergeant",
-      description: "Senior non-commissioned officer, principal advisor to the company commander"
+      description: "Advisor of the Squadron Commander"
     }
   ],
   "Non-Commissioned Officer": [
     {
       name: "Master Sergeant",
-      description: "Senior non-commissioned officer, principal NCO at battalion level"
+      description: "Section Chief"
     },
     {
       name: "Sergeant First Class",
-      description: "Senior non-commissioned officer, primary platoon advisor"
+      description: "Squadron Chief"
     },
     {
       name: "Staff Sergeant",
-      description: "Senior non-commissioned officer, platoon sergeant"
+      description: "Squadron Non-Commissioned Officer In Charge"
     },
     {
       name: "Sergeant",
-      description: "Non-commissioned officer, squad leader"
+      description: "Squadron Sergeant"
     }
   ],
   "Soldier": [
     {
       name: "Corporal",
-      description: "Junior non-commissioned officer, team leader"
+      description: "Team Leader"
     },
     {
       name: "Specialist",
-      description: "Experienced soldier with technical expertise"
+      description: "Private First Class with additional responsibilities"
     },
     {
       name: "Private First Class",
-      description: "Experienced private with additional responsibilities"
+      description: "Private with additional responsibilities"
     },
     {
       name: "Private",
-      description: "Entry-level rank, basic trained soldier"
+      description: "Entry-level rank"
     }
   ]
 };
