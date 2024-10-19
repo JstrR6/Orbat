@@ -5,24 +5,24 @@ const structureFilePath = path.join(__dirname, 'orbatStructure.json');
 const leadershipFilePath = path.join(__dirname, 'leadershipAssignments.json');
 
 async function getOrbatStructure() {
-  try {
-    const data = await fs.readFile(structureFilePath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading ORBAT structure:', error);
-    return null;
+    try {
+      const data = await fs.readFile(structureFilePath, 'utf8');
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Error reading ORBAT structure:', error);
+      return null;
+    }
   }
-}
 
-async function getLeadershipAssignments() {
-  try {
-    const data = await fs.readFile(leadershipFilePath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading leadership assignments:', error);
-    return null;
+  async function getLeadershipAssignments() {
+    try {
+      const data = await fs.readFile(leadershipFilePath, 'utf8');
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Error reading leadership assignments:', error);
+      return null;
+    }
   }
-}
 
 async function updateLeadership(unitId, position, name) {
   try {

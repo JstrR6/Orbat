@@ -53,11 +53,20 @@ app.get('/orders', (req, res) => {
 app.post('/api/update-leadership', async (req, res) => {
   const { unitId, position, name } = req.body;
   try {
-    const success = await updateLeadership(unitId, position, name);
-    if (success) {
+    const leadershipAssignments = await getLeadershipAssignments();
+    
+    if (leadershipAssignments[unitId] && leadershipAssignments[unitId].hasOwnProperty(position)) {
+      leadershipAssignments[unitId][position] = name;
+      
+      // Write updated assignments back to the file
+      await fs.writeFile(
+        path.join(__dirname, 'leadershipAssignments.json'),
+        JSON.stringify(leadershipAssignments, null, 2)
+      );
+      
       res.json({ message: 'Leadership updated successfully' });
     } else {
-      res.status(400).json({ message: 'Failed to update leadership' });
+      res.status(400).json({ message: 'Invalid unit ID or position' });
     }
   } catch (error) {
     console.error('Error updating leadership:', error);

@@ -1,0 +1,19 @@
+name: Update Leadership Assignments
+
+on:
+  push:
+    paths:
+      - 'leadershipAssignments.json'
+
+jobs:
+  update-leadership:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Commit and push if changed
+      run: |
+        git config --global user.email "github-actions@example.com"
+        git config --global user.name "GitHub Actions"
+        git add leadershipAssignments.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update leadership assignments" && git push)
