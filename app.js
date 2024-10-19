@@ -32,27 +32,35 @@ app.get('/', (req, res) => {
 });
 
 app.get('/rank-structure', (req, res) => {
-  res.render('rankStructure', { ranks: ranksForDisplay });
+  res.render('rankStructure', { title: 'Rank Structure', ranks: ranksForDisplay });
 });
 
 app.get('/orbat', (req, res) => {
-  // TODO: Implement ORBAT page
-  res.send('ORBAT page - Coming soon');
+  res.render('orbat', { title: 'ORBAT' });
 });
 
 app.get('/forms', (req, res) => {
-  // TODO: Implement Forms page
-  res.send('Forms page - Coming soon');
+  res.render('forms', { title: 'Forms' });
 });
 
 app.get('/orders', (req, res) => {
-  // TODO: Implement Orders page
-  res.send('Orders By The General page - Coming soon');
+  res.render('orders', { title: 'Orders By The General' });
 });
 
 app.get('/api/orbat', (req, res) => {
   // TODO: Implement ORBAT data retrieval
   res.json({ message: 'ORBAT data will be served here' });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render('error', { title: 'Error', message: 'Something went wrong!' });
+});
+
+// 404 handler
+app.use((req, res, next) => {
+  res.status(404).render('error', { title: '404 Not Found', message: "Sorry, we couldn't find that page." });
 });
 
 // Start the server
