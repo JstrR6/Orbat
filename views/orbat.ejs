@@ -94,23 +94,48 @@
             <div class="level">
                 <div class="unit-box">
                     <h2 class="text-md font-semibold">101st Infantry Division</h2>
-                    <div class="level">
-                        <div class="unit-box">
-                            <h3 class="text-sm">111th Infantry Squadron</h3>
-                        </div>
-                        <div class="unit-box">
-                            <h3 class="text-sm">112th Infantry Squadron</h3>
-                        </div>
-                        <div class="unit-box">
-                            <h3 class="text-sm">113th Support Squadron</h3>
+                    <button onclick="toggleExpand('division1-1-expand')">Expand Squadrons</button>
+                    <div class="expanded-content" id="division1-1-expand">
+                        <div class="level">
+                            <div class="unit-box">
+                                <h3 class="text-sm">111th Infantry Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">112th Infantry Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">113th Support Squadron</h3>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="unit-box">
                     <h2 class="text-md font-semibold">102nd Armored Division</h2>
+                    <button onclick="toggleExpand('division1-2-expand')">Expand Squadrons</button>
+                    <div class="expanded-content" id="division1-2-expand">
+                        <div class="level">
+                            <div class="unit-box">
+                                <h3 class="text-sm">121st Armored Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">122nd Armored Squadron</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="unit-box">
                     <h2 class="text-md font-semibold">103rd Artillery Division</h2>
+                    <button onclick="toggleExpand('division1-3-expand')">Expand Squadrons</button>
+                    <div class="expanded-content" id="division1-3-expand">
+                        <div class="level">
+                            <div class="unit-box">
+                                <h3 class="text-sm">131st Artillery Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">132nd Rocket Artillery Squadron</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -120,12 +145,45 @@
             <div class="level">
                 <div class="unit-box">
                     <h2 class="text-md font-semibold">201st Airborne Division</h2>
+                    <button onclick="toggleExpand('division2-1-expand')">Expand Squadrons</button>
+                    <div class="expanded-content" id="division2-1-expand">
+                        <div class="level">
+                            <div class="unit-box">
+                                <h3 class="text-sm">211th Airborne Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">212th Recon Squadron</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="unit-box">
                     <h2 class="text-md font-semibold">202nd Air Assault Division</h2>
+                    <button onclick="toggleExpand('division2-2-expand')">Expand Squadrons</button>
+                    <div class="expanded-content" id="division2-2-expand">
+                        <div class="level">
+                            <div class="unit-box">
+                                <h3 class="text-sm">221st Helicopter Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">222nd Air Assault Squadron</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="unit-box">
                     <h2 class="text-md font-semibold">203rd Aviation Division</h2>
+                    <button onclick="toggleExpand('division2-3-expand')">Expand Squadrons</button>
+                    <div class="expanded-content" id="division2-3-expand">
+                        <div class="level">
+                            <div class="unit-box">
+                                <h3 class="text-sm">231st UAV Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">232nd Fixed-Wing Squadron</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,27 +193,53 @@
             <div class="level">
                 <div class="unit-box">
                     <h2 class="text-md font-semibold">301st Armored Division</h2>
+                    <button onclick="toggleExpand('division3-1-expand')">Expand Squadrons</button>
+                    <div class="expanded-content" id="division3-1-expand">
+                        <div class="level">
+                            <div class="unit-box">
+                                <h3 class="text-sm">311th Heavy Armored Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">312th Light Armored Squadron</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="unit-box">
                     <h2 class="text-md font-semibold">302nd Mechanized Division</h2>
+                    <button onclick="toggleExpand('division3-2-expand')">Expand Squadrons</button>
+                    <div class="expanded-content" id="division3-2-expand">
+                        <div class="level">
+                            <div class="unit-box">
+                                <h3 class="text-sm">321st Mechanized Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">322nd Recon Squadron</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="unit-box">
                     <h2 class="text-md font-semibold">303rd Armored Artillery Division</h2>
+                    <button onclick="toggleExpand('division3-3-expand')">Expand Squadrons</button>
+                    <div class="expanded-content" id="division3-3-expand">
+                        <div class="level">
+                            <div class="unit-box">
+                                <h3 class="text-sm">331st Artillery Squadron</h3>
+                            </div>
+                            <div class="unit-box">
+                                <h3 class="text-sm">332nd Rocket Artillery Squadron</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function toggleExpand(corpsId) {
-            // Close all expanded content
-            var allExpanded = document.querySelectorAll('.expanded-content');
-            allExpanded.forEach(function (content) {
-                content.style.display = 'none';
-            });
-
-            // Toggle the selected corps
-            var selectedContent = document.getElementById(corpsId);
+        function toggleExpand(sectionId) {
+            var selectedContent = document.getElementById(sectionId);
             if (selectedContent.style.display === 'block') {
                 selectedContent.style.display = 'none';
             } else {
