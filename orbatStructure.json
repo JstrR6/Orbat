@@ -1,0 +1,36 @@
+{
+    "id": "1st_army",
+    "name": "1st Army",
+    "type": "Army",
+    "subordinates": [
+      {
+        "id": "11th_infantry_corps",
+        "name": "11th Infantry Corps",
+        "type": "Corps",
+        "subordinates": [
+          {
+            "id": "101st_infantry_division",
+            "name": "101st Infantry Division",
+            "type": "Division",
+            "subordinates": [
+              {
+                "id": "111th_infantry_squadron",
+                "name": "111th Infantry Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "112th_infantry_squadron",
+                "name": "112th Infantry Squadron",
+                "type": "Squadron"
+              },
+              {
+                "id": "113th_support_squadron",
+                "name": "113th Support Squadron",
+                "type": "Squadron"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }

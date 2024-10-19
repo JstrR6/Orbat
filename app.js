@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { initializeDiscordBot } = require('./server');
+const { getOrbatStructure, getLeadershipAssignments, updateLeadership } = require('./orbatdata');
 const militaryRanks = require('./ranks');
 
 const app = express();
@@ -29,8 +30,15 @@ app.get('/rank-structure', (req, res) => {
   res.render('rankStructure', { title: 'Rank Structure', ranks: militaryRanks });
 });
 
-app.get('/orbat', (req, res) => {
-  res.render('orbat', { title: 'ORBAT' });
+app.get('/orbat', async (req, res) => {
+  try {
+    const structure = await getOrbatStructure();
+    const leadership = await getLeadershipAssignments();
+    res.render('orbat', { title: 'ORBAT', structure, leadership });
+  } catch (error) {
+    console.error('Error loading ORBAT data:', error);
+    res.status(500).send('Error loading ORBAT data');
+  }
 });
 
 app.get('/forms', (req, res) => {
@@ -41,9 +49,31 @@ app.get('/orders', (req, res) => {
   res.render('orders', { title: 'Orders By The General' });
 });
 
-app.get('/api/orbat', (req, res) => {
-  // TODO: Implement ORBAT data retrieval
-  res.json({ message: 'ORBAT data will be served here' });
+// API Routes
+app.post('/api/update-leadership', async (req, res) => {
+  const { unitId, position, name } = req.body;
+  try {
+    const success = await updateLeadership(unitId, position, name);
+    if (success) {
+      res.json({ message: 'Leadership updated successfully' });
+    } else {
+      res.status(400).json({ message: 'Failed to update leadership' });
+    }
+  } catch (error) {
+    console.error('Error updating leadership:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.get('/api/orbat', async (req, res) => {
+  try {
+    const structure = await getOrbatStructure();
+    const leadership = await getLeadershipAssignments();
+    res.json({ structure, leadership });
+  } catch (error) {
+    console.error('Error fetching ORBAT data:', error);
+    res.status(500).json({ message: 'Error fetching ORBAT data' });
+  }
 });
 
 // Error handling middleware
@@ -69,3 +99,5 @@ process.on('SIGINT', () => {
   discordClient.destroy();
   process.exit(0);
 });
+
+module.exports = app;
