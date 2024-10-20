@@ -8,7 +8,10 @@ const connectDB = require('./db');
 const app = express();
 const port = process.env.PORT || 3000;
 
-connectDB();
+connectDB().then(() => {
+  // Initialize ORBAT structure after database connection is established
+  initializeOrbatStructure();
+});
 
 // Initialize Discord Bot
 const discordClient = initializeDiscordBot();
