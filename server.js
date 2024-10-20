@@ -30,17 +30,17 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// Session setup
+// Session setup (necessary for passport to track login sessions)
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'some-random-secret',
+  secret: process.env.SESSION_SECRET || 'some-random-secret',  // You can replace with a secure secret
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: { secure: false }  // Set to true if using https
 }));
 
 // Initialize Passport and sessions
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.session());  // Enable session support in Passport
 
 // Passport OAuth strategy
 passport.use(new DiscordStrategy({
@@ -102,16 +102,17 @@ app.get('/general-panel', (req, res) => {
   res.render('general-panel');
 });
 
+// Redirect to dashboard after successful verification
+app.get('/callback', passport.authenticate('discord', { failureRedirect: '/' }), (req, res) => {
+  res.redirect('/dashboard');  // Redirect to dashboard on successful authentication
+});
+
 // Discord OAuth routes
 app.get('/verify/:id', (req, res) => {
   res.redirect('/auth/discord');
 });
 
 app.get('/auth/discord', passport.authenticate('discord'));
-
-app.get('/callback', passport.authenticate('discord', { failureRedirect: '/' }), (req, res) => {
-  res.send('Successfully verified! You can close this window.');
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

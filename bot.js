@@ -89,6 +89,6 @@ client.on('messageCreate', async (message) => {
     const member = await message.guild.members.fetch(message.author.id);
     await updateUserRole(member);
     const verifyLink = `https://usm-dashboard.onrender.com/verify/${member.user.id}`;
-    await message.author.send(`Click here to verify your account: ${verifyLink}`);
+    await message.author.send(`Click here to verify your account`);
   }
 });
