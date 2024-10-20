@@ -43,29 +43,22 @@ async function getOrbatStructure() {
   
       // Recursive function to populate all subordinates
       async function populateSubordinates(unit) {
-        if (unit.subordinates && unit.subordinates.length > 0) {
-          // Fetch all subordinates based on IDs stored in the 'subordinates' array
-          const populatedSubordinates = await Orbat.find({
-            _id: { $in: unit.subordinates }
-          }).lean();
-  
-          // Recursively populate the subordinates of each subordinate
-          unit.subordinates = await Promise.all(
-            populatedSubordinates.map(subUnit => populateSubordinates(subUnit))
-          );
+        try {
+          if (unit.subordinates && unit.subordinates.length > 0) {
+            const populatedSubordinates = await Orbat.find({
+              _id: { $in: unit.subordinates }
+            }).lean();
+      
+            unit.subordinates = await Promise.all(
+              populatedSubordinates.map(subUnit => populateSubordinates(subUnit))
+            );
+          }
+          return unit;
+        } catch (error) {
+          console.error(`Error fetching subordinates for unit ${unit.name}:`, error);
+          return unit;
         }
-        return unit;
       }
-  
-      // Populate all subordinates for the root unit
-      const fullStructure = await populateSubordinates(rootUnit);
-      return fullStructure;
-  
-    } catch (error) {
-      console.error('Error fetching ORBAT structure:', error);
-      return null;
-    }
-  }
 
   async function initializeOrbatStructure() {
     try {
