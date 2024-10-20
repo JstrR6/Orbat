@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
@@ -9,9 +10,8 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true,
 }).then(() => {
   console.log('Connected to MongoDB');
-}).catch(err => console.error(err));
+}).catch(err => console.error('MongoDB connection error:', err));
 
-// Express app setup
 const app = express();
 
 // User Schema
@@ -30,13 +30,18 @@ passport.use(new DiscordStrategy({
   callbackURL: 'https://usm-dashboard.onrender.com/callback',
   scope: ['identify', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
-  // Save or update user info in MongoDB
-  const user = await User.findOneAndUpdate(
-    { discordId: profile.id },
-    { discordUsername: profile.username, discordId: profile.id },
-    { upsert: true, new: true }
-  );
-  return done(null, user);
+  try {
+    // Save or update user info in MongoDB
+    const user = await User.findOneAndUpdate(
+      { discordId: profile.id },
+      { discordUsername: profile.username, discordId: profile.id },
+      { upsert: true, new: true }
+    );
+    return done(null, user);
+  } catch (error) {
+    console.error('Error in DiscordStrategy:', error);
+    return done(error, null);
+  }
 }));
 
 app.use(passport.initialize());
@@ -49,6 +54,11 @@ app.get('/auth/discord', passport.authenticate('discord'));
 
 app.get('/callback', passport.authenticate('discord', { failureRedirect: '/' }), (req, res) => {
   res.send('Successfully verified! You can close this window.');
+});
+
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).send('Internal Server Error');
 });
 
 app.listen(process.env.PORT || 3000, () => {
