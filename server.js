@@ -5,6 +5,13 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const path = require('path');
 
+// Environment variable check
+console.log('Environment Check:');
+console.log('DISCORD_CLIENT_ID:', process.env.DISCORD_CLIENT_ID ? 'Set' : 'Not Set');
+console.log('DISCORD_CLIENT_SECRET:', process.env.DISCORD_CLIENT_SECRET ? 'Set' : 'Not Set');
+console.log('MONGO_URI:', process.env.MONGO_URI ? 'Set' : 'Not Set');
+console.log('SESSION_SECRET:', process.env.SESSION_SECRET ? 'Set' : 'Not Set');
+
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -50,10 +57,13 @@ app.use(passport.session());
 passport.use(new DiscordStrategy({
   clientID: process.env.DISCORD_CLIENT_ID,
   clientSecret: process.env.DISCORD_CLIENT_SECRET,
-  callbackURL: 'https://usm-dashboard.onrender.com/callback',
+  callbackURL: process.env.NODE_ENV === 'production' 
+    ? 'https://usm-dashboard.onrender.com/callback'
+    : 'http://localhost:3000/callback',
   scope: ['identify', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
+    console.log('Discord profile:', profile);
     let user = await User.findOne({ discordId: profile.id });
     
     if (!user) {
@@ -164,7 +174,6 @@ app.get('/general-panel', isAuthenticated, checkRole('High Command'), (req, res)
 
 // Discord OAuth routes
 app.get('/verify/:id', (req, res) => {
-  // Store the user ID in session for later use
   req.session.verifyUserId = req.params.id;
   res.redirect('/auth/discord');
 });
@@ -174,16 +183,32 @@ app.get('/auth/discord', passport.authenticate('discord', {
 }));
 
 app.get('/callback', 
-  passport.authenticate('discord', { failureRedirect: '/' }),
+  passport.authenticate('discord', { 
+    failureRedirect: '/',
+    failureFlash: true
+  }),
   (req, res) => {
+    console.log('Authentication successful');
+    console.log('User:', req.user);
     res.redirect('/dashboard');
   }
 );
 
 app.get('/logout', (req, res) => {
-  req.logout(function(err) {
-    if (err) { return next(err); }
+  req.logout((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+      return res.redirect('/');
+    }
     res.redirect('/');
+  });
+});
+
+// Authentication status route
+app.get('/auth/status', (req, res) => {
+  res.json({
+    authenticated: req.isAuthenticated(),
+    user: req.user || null
   });
 });
 
@@ -210,9 +235,10 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error('Server error:', err);
+  console.error('Detailed error:', err);
   res.status(500).render('error', {
     message: 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err : {},
     user: req.user,
     userRole: req.user?.highestRole || 'Member'
   });
