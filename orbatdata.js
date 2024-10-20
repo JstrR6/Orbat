@@ -35,25 +35,40 @@ async function updateLeadership(unitId, position, name) {
 async function getOrbatStructure() {
     try {
       const rootUnit = await Orbat.findOne({ type: 'Army' });
+      console.log('Root unit found:', rootUnit);
+  
       if (!rootUnit) {
-        console.error('Root unit not found');
-        return null;
+        console.log('Root unit not found in database, falling back to JSON file');
+        const jsonPath = path.join(__dirname, 'orbatStructure.json');
+        const jsonData = await fs.readFile(jsonPath, 'utf8');
+        return JSON.parse(jsonData);
       }
   
-      async function populateSubordinates(unitId) {
+      async function populateSubordinates(unitId, level = 0) {
         const unit = await Orbat.findById(unitId);
-        if (!unit) return null;
-  
-        const populatedUnit = unit.toObject();
-        if (unit.subordinates && unit.subordinates.length > 0) {
-          populatedUnit.subordinates = await Promise.all(
-            unit.subordinates.map(subId => populateSubordinates(subId))
-          );
+        if (!unit) {
+          console.log(`${' '.repeat(level * 2)}Unit not found for ID: ${unitId}`);
+          return null;
         }
+  
+        console.log(`${' '.repeat(level * 2)}Found unit: ${unit.name} (${unit.type})`);
+        const populatedUnit = unit.toObject();
+  
+        if (unit.subordinates && unit.subordinates.length > 0) {
+          console.log(`${' '.repeat(level * 2)}Populating ${unit.subordinates.length} subordinates for ${unit.name}`);
+          populatedUnit.subordinates = await Promise.all(
+            unit.subordinates.map(subId => populateSubordinates(subId, level + 1))
+          );
+        } else {
+          console.log(`${' '.repeat(level * 2)}No subordinates for ${unit.name}`);
+        }
+  
         return populatedUnit;
       }
   
-      return await populateSubordinates(rootUnit._id);
+      const fullStructure = await populateSubordinates(rootUnit._id);
+      console.log('Full structure:', JSON.stringify(fullStructure, null, 2));
+      return fullStructure;
     } catch (error) {
       console.error('Error fetching ORBAT structure:', error);
       return null;
@@ -72,11 +87,13 @@ async function getOrbatStructure() {
       const jsonData = await fs.readFile(jsonPath, 'utf8');
       const orbatData = JSON.parse(jsonData);
   
-      async function createUnit(unitData) {
+      async function createUnit(unitData, parentId = null) {
+        console.log(`Creating unit: ${unitData.name} (${unitData.type})`);
         const unit = new Orbat({
           id: unitData.id,
           name: unitData.name,
           type: unitData.type,
+          parentId: parentId,
           subordinates: []
         });
   
@@ -84,7 +101,7 @@ async function getOrbatStructure() {
   
         if (unitData.subordinates && unitData.subordinates.length > 0) {
           for (const subordinateData of unitData.subordinates) {
-            const subordinateUnit = await createUnit(subordinateData);
+            const subordinateUnit = await createUnit(subordinateData, unit._id);
             unit.subordinates.push(subordinateUnit._id);
           }
           await unit.save();
