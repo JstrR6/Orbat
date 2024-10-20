@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
@@ -40,7 +39,7 @@ app.use(passport.session());  // Enable session support in Passport
 passport.use(new DiscordStrategy({
   clientID: process.env.DISCORD_CLIENT_ID,
   clientSecret: process.env.DISCORD_CLIENT_SECRET,
-  callbackURL: 'https://your-render-app.com/callback',
+  callbackURL: 'https://usm-dashboard.onrender.com/callback',
   scope: ['identify', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
