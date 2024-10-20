@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "postinstall": "npm install mongoose",
     "dev": "nodemon app.js",
     "bot": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"

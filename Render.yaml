@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: orbat-viewer
+    env: node
+    buildCommand: npm install && npm run postinstall
+    startCommand: npm start
+    envVars:
+      - key: MONGODB_URI
+        sync: false
