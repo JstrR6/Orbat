@@ -1,7 +1,12 @@
 const express = require('express');
 const path = require('path');
 const { initializeDiscordBot } = require('./server');
-const orbatData = require('./orbatdata');
+const {
+  getOrbatStructure,
+  getLeadershipAssignments,
+  updateLeadership,
+  initializeOrbatStructure
+} = require('./orbatdata');
 const militaryRanks = require('./ranks');
 const connectDB = require('./db');
 
@@ -10,7 +15,7 @@ const port = process.env.PORT || 3000;
 
 connectDB().then(() => {
   // Initialize ORBAT structure after database connection is established
-  orbatData.initializeOrbatStructure();
+  initializeOrbatStructure();
 });
 
 // Initialize Discord Bot
@@ -70,6 +75,7 @@ app.post('/api/update-leadership', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 app.get('/api/orbat', async (req, res) => {
   try {
     const structure = await getOrbatStructure();
