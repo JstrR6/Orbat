@@ -33,22 +33,29 @@ async function updateLeadership(unitId, position, name) {
 }
 
 async function getOrbatStructure() {
-  try {
-    const rootUnit = await Orbat.findOne({ type: 'Army' }).populate({
-      path: 'subordinates',
-      populate: {
-        path: 'subordinates',
-        populate: {
-          path: 'subordinates'
+    try {
+      const rootUnit = await Orbat.findOne({ type: 'Army' }).lean();
+      
+      async function populateSubordinates(unit) {
+        if (unit.subordinates && unit.subordinates.length > 0) {
+          const populatedSubordinates = await Promise.all(
+            unit.subordinates.map(async (subId) => {
+              const subUnit = await Orbat.findById(subId).lean();
+              return await populateSubordinates(subUnit);
+            })
+          );
+          unit.subordinates = populatedSubordinates;
         }
+        return unit;
       }
-    });
-    return rootUnit;
-  } catch (error) {
-    console.error('Error fetching ORBAT structure:', error);
-    return null;
+  
+      const fullStructure = await populateSubordinates(rootUnit);
+      return fullStructure;
+    } catch (error) {
+      console.error('Error fetching ORBAT structure:', error);
+      return null;
+    }
   }
-}
 
 async function initializeOrbatStructure() {
   try {
