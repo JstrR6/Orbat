@@ -44,6 +44,7 @@ app.get('/rank-structure', (req, res) => {
 app.get('/orbat', async (req, res) => {
   try {
     const structure = await getOrbatStructure();
+    console.log('ORBAT structure fetched:', JSON.stringify(structure, null, 2));  // Add this line for debugging
     const leadership = await getLeadershipAssignments();
     res.render('orbat', { title: 'ORBAT', structure, leadership });
   } catch (error) {
