@@ -3,6 +3,7 @@ const express = require('express');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const mongoose = require('mongoose');
+const session = require('express-session'); // Add express-session
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -23,11 +24,23 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// Setup Discord OAuth
+// Session setup (necessary for passport to track login sessions)
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'some-random-secret',  // You can replace with a secure secret
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }  // Set to true if using https
+}));
+
+// Initialize Passport and sessions
+app.use(passport.initialize());
+app.use(passport.session());  // Enable session support in Passport
+
+// Passport OAuth strategy
 passport.use(new DiscordStrategy({
   clientID: process.env.DISCORD_CLIENT_ID,
   clientSecret: process.env.DISCORD_CLIENT_SECRET,
-  callbackURL: 'https://usm-dashboard.onrender.com/callback',
+  callbackURL: 'https://your-render-app.com/callback',
   scope: ['identify', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
@@ -44,8 +57,21 @@ passport.use(new DiscordStrategy({
   }
 }));
 
-app.use(passport.initialize());
+// Serialize and deserialize users for session management
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
 
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
+
+// Routes
 app.get('/verify/:id', (req, res) => {
   res.redirect('/auth/discord');
 });
@@ -56,6 +82,7 @@ app.get('/callback', passport.authenticate('discord', { failureRedirect: '/' }),
   res.send('Successfully verified! You can close this window.');
 });
 
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   res.status(500).send('Internal Server Error');
