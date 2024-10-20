@@ -134,8 +134,8 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Routes
 app.get('/', (req, res) => {
-  res.render('home');
-});
+    res.redirect('/dashboard');
+  });
 
 app.get('/login', (req, res) => {
   res.render('login');
