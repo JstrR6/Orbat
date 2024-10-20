@@ -3,7 +3,7 @@ const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const mongoose = require('mongoose');
 const session = require('express-session');
-const path = require('path');  // Add 'path' for serving React build
+const path = require('path'); // For resolving directory paths
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -15,6 +15,12 @@ mongoose.connect(process.env.MONGO_URI, {
 
 const app = express();
 
+// Set up EJS as the templating engine
+app.set('view engine', 'ejs');
+
+// Set the views directory to 'frontend'
+app.set('views', path.join(__dirname, 'frontend'));
+
 // User Schema
 const userSchema = new mongoose.Schema({
   discordUsername: String,
@@ -24,17 +30,17 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// Session setup (necessary for passport to track login sessions)
+// Session setup
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'some-random-secret',  // You can replace with a secure secret
+  secret: process.env.SESSION_SECRET || 'some-random-secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }  // Set to true if using https
+  cookie: { secure: false }
 }));
 
 // Initialize Passport and sessions
 app.use(passport.initialize());
-app.use(passport.session());  // Enable session support in Passport
+app.use(passport.session());
 
 // Passport OAuth strategy
 passport.use(new DiscordStrategy({
@@ -71,7 +77,32 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Routes for Discord OAuth
+// Routes to render EJS pages
+app.get('/dashboard', (req, res) => {
+  res.render('dashboard');
+});
+
+app.get('/orbat', (req, res) => {
+  res.render('orbat');
+});
+
+app.get('/forms', (req, res) => {
+  res.render('forms');
+});
+
+app.get('/orders', (req, res) => {
+  res.render('orders');
+});
+
+app.get('/users', (req, res) => {
+  res.render('users');
+});
+
+app.get('/general-panel', (req, res) => {
+  res.render('general-panel');
+});
+
+// Discord OAuth routes
 app.get('/verify/:id', (req, res) => {
   res.redirect('/auth/discord');
 });
@@ -82,21 +113,12 @@ app.get('/callback', passport.authenticate('discord', { failureRedirect: '/' }),
   res.send('Successfully verified! You can close this window.');
 });
 
-// Serve static React app
-app.use(express.static(path.join(__dirname, 'frontend', 'build')));
-
-// Fallback route for React (to ensure that React Router works correctly)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
-});
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   res.status(500).send('Internal Server Error');
 });
 
-// Start the server
 app.listen(process.env.PORT || 3000, () => {
   console.log('Server running');
 });
