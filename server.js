@@ -79,7 +79,12 @@ passport.deserializeUser(async (id, done) => {
 
 // Routes to render EJS pages
 app.get('/dashboard', (req, res) => {
-  res.render('dashboard');
+  try {
+    res.render('dashboard');
+  } catch (error) {
+    console.error("Error rendering dashboard:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 app.get('/orbat', (req, res) => {
