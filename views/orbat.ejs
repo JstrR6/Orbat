@@ -58,7 +58,6 @@
 
     <div class="container mx-auto px-4 pt-20">
         <h1 class="text-3xl font-bold mb-6 text-center">ORBAT Viewer</h1>
-        
         <div class="orbat-container">
             <!-- 1st Army -->
             <div class="unit-box" id="<%= structure.id %>">
@@ -70,7 +69,7 @@
                 <button onclick="showLeadershipForm('<%= structure.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
             </div>
         
-            <!-- Loop through all corps (subordinates of 1st Army) -->
+            <!-- Loop through ALL corps (subordinates of 1st Army) -->
             <div class="corps-container">
                 <% structure.subordinates.forEach(corps => { %>
                     <div class="unit-box" id="<%= corps.id %>">
@@ -84,7 +83,7 @@
                             Expand Divisions
                         </button>
         
-                        <!-- Loop through all divisions in each corps -->
+                        <!-- Loop through divisions in each corps -->
                         <div id="divisions-<%= corps.id %>" class="divisions mt-4">
                             <% corps.subordinates.forEach(division => { %>
                                 <div class="unit-box mt-2" id="<%= division.id %>">
@@ -98,7 +97,7 @@
                                         Expand Squadrons
                                     </button>
         
-                                    <!-- Loop through all squadrons in each division -->
+                                    <!-- Loop through squadrons in each division -->
                                     <div id="squadrons-<%= division.id %>" class="squadrons mt-2">
                                         <% division.subordinates.forEach(squadron => { %>
                                             <div class="unit-box mt-1" id="<%= squadron.id %>">
@@ -117,7 +116,7 @@
                     </div>
                 <% }); %>
             </div>
-        </div>
+        </div>        
 
         <!-- Leadership Update Form (Hidden by default) -->
         <div id="leadershipForm" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" style="display: none;">
