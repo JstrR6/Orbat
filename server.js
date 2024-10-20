@@ -46,7 +46,8 @@ app.use(session({
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
+  },
+  name: 'discord.oauth2'
 }));
 
 // Initialize Passport and sessions
@@ -178,21 +179,30 @@ app.get('/verify/:id', (req, res) => {
   res.redirect('/auth/discord');
 });
 
-app.get('/auth/discord', passport.authenticate('discord', {
-  scope: ['identify', 'guilds']
-}));
+app.get('/auth/discord', (req, res, next) => {
+  passport.authenticate('discord', {
+    scope: ['identify', 'guilds'],
+    prompt: 'consent'
+  })(req, res, next);
+});
 
-app.get('/callback', 
+app.get('/callback', (req, res, next) => {
+  console.log('Callback route hit');
+  console.log('Query parameters:', req.query);
+  
   passport.authenticate('discord', { 
     failureRedirect: '/',
     failureFlash: true
-  }),
-  (req, res) => {
+  })(req, res, (err) => {
+    if (err) {
+      console.error('Authentication error:', err);
+      return res.redirect('/');
+    }
     console.log('Authentication successful');
     console.log('User:', req.user);
     res.redirect('/dashboard');
-  }
-);
+  });
+});
 
 app.get('/logout', (req, res) => {
   req.logout((err) => {
@@ -209,6 +219,14 @@ app.get('/auth/status', (req, res) => {
   res.json({
     authenticated: req.isAuthenticated(),
     user: req.user || null
+  });
+});
+
+app.get('/session-check', (req, res) => {
+  res.json({
+    session: req.session,
+    user: req.user,
+    isAuthenticated: req.isAuthenticated()
   });
 });
 
