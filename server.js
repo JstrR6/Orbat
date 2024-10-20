@@ -3,7 +3,7 @@ const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const mongoose = require('mongoose');
 const session = require('express-session');
-const path = require('path'); // For resolving directory paths
+const path = require('path');
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -17,9 +17,10 @@ const app = express();
 
 // Set up EJS as the templating engine
 app.set('view engine', 'ejs');
-
-// Set the views directory to 'frontend'
 app.set('views', path.join(__dirname, 'frontend'));
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -30,17 +31,20 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// Session setup (necessary for passport to track login sessions)
+// Session setup
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'some-random-secret',  // You can replace with a secure secret
+  secret: process.env.SESSION_SECRET || 'some-random-secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }  // Set to true if using https
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
 // Initialize Passport and sessions
 app.use(passport.initialize());
-app.use(passport.session());  // Enable session support in Passport
+app.use(passport.session());
 
 // Passport OAuth strategy
 passport.use(new DiscordStrategy({
@@ -50,12 +54,20 @@ passport.use(new DiscordStrategy({
   scope: ['identify', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    // Save or update user info in MongoDB
-    const user = await User.findOneAndUpdate(
-      { discordId: profile.id },
-      { discordUsername: profile.username, discordId: profile.id },
-      { upsert: true, new: true }
-    );
+    let user = await User.findOne({ discordId: profile.id });
+    
+    if (!user) {
+      user = new User({
+        discordUsername: profile.username,
+        discordId: profile.id,
+        highestRole: 'Member', // Default role
+        xp: 0
+      });
+    } else {
+      user.discordUsername = profile.username;
+    }
+    
+    await user.save();
     return done(null, user);
   } catch (error) {
     console.error('Error in DiscordStrategy:', error);
@@ -63,7 +75,7 @@ passport.use(new DiscordStrategy({
   }
 }));
 
-// Serialize and deserialize users for session management
+// Serialize and deserialize users
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
@@ -77,54 +89,137 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Routes to render EJS pages
-app.get('/dashboard', (req, res) => {
-  try {
-    res.render('dashboard');
-  } catch (error) {
-    console.error("Error rendering dashboard:", error);
-    res.status(500).send("Internal Server Error");
+// Authentication middleware
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
   }
+  res.redirect('/auth/discord');
+}
+
+// Role-based access middleware
+function checkRole(role) {
+  return (req, res, next) => {
+    if (req.user && req.user.highestRole === role) {
+      next();
+    } else {
+      res.status(403).render('error', { 
+        message: 'Access denied',
+        user: req.user,
+        userRole: req.user?.highestRole || 'Member'
+      });
+    }
+  };
+}
+
+// Routes
+app.get('/', (req, res) => {
+  res.render('dashboard', {
+    user: req.user,
+    userRole: req.user?.highestRole || 'Member'
+  });
 });
 
-app.get('/orbat', (req, res) => {
-  res.render('orbat');
+app.get('/dashboard', isAuthenticated, (req, res) => {
+  res.render('dashboard', {
+    user: req.user,
+    userRole: req.user?.highestRole || 'Member'
+  });
 });
 
-app.get('/forms', (req, res) => {
-  res.render('forms');
+app.get('/orbat', isAuthenticated, (req, res) => {
+  res.render('orbat', {
+    user: req.user,
+    userRole: req.user?.highestRole || 'Member'
+  });
 });
 
-app.get('/orders', (req, res) => {
-  res.render('orders');
+app.get('/forms', isAuthenticated, (req, res) => {
+  res.render('forms', {
+    user: req.user,
+    userRole: req.user?.highestRole || 'Member'
+  });
 });
 
-app.get('/users', (req, res) => {
-  res.render('users');
+app.get('/orders', isAuthenticated, (req, res) => {
+  res.render('orders', {
+    user: req.user,
+    userRole: req.user?.highestRole || 'Member'
+  });
 });
 
-app.get('/general-panel', (req, res) => {
-  res.render('general-panel');
+app.get('/users', isAuthenticated, checkRole('Commissioned Officer'), (req, res) => {
+  res.render('users', {
+    user: req.user,
+    userRole: req.user?.highestRole || 'Member'
+  });
 });
 
-// Redirect to dashboard after successful verification
-app.get('/callback', passport.authenticate('discord', { failureRedirect: '/' }), (req, res) => {
-  res.redirect('/dashboard');  // Redirect to dashboard on successful authentication
+app.get('/general-panel', isAuthenticated, checkRole('High Command'), (req, res) => {
+  res.render('general-panel', {
+    user: req.user,
+    userRole: req.user?.highestRole || 'Member'
+  });
 });
 
 // Discord OAuth routes
 app.get('/verify/:id', (req, res) => {
+  // Store the user ID in session for later use
+  req.session.verifyUserId = req.params.id;
   res.redirect('/auth/discord');
 });
 
-app.get('/auth/discord', passport.authenticate('discord'));
+app.get('/auth/discord', passport.authenticate('discord', {
+  scope: ['identify', 'guilds']
+}));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).send('Internal Server Error');
+app.get('/callback', 
+  passport.authenticate('discord', { failureRedirect: '/' }),
+  (req, res) => {
+    res.redirect('/dashboard');
+  }
+);
+
+app.get('/logout', (req, res) => {
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log('Server running');
+// API endpoints for XP and role updates
+app.get('/api/user/:id', isAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findOne({ discordId: req.params.id });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Error handling middleware
+app.use((req, res, next) => {
+  res.status(404).render('error', {
+    message: 'Page not found',
+    user: req.user,
+    userRole: req.user?.highestRole || 'Member'
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).render('error', {
+    message: 'Internal Server Error',
+    user: req.user,
+    userRole: req.user?.highestRole || 'Member'
+  });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

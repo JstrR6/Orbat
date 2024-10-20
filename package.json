@@ -4,9 +4,9 @@
     "description": "A Discord bot with OAuth verification and MongoDB integration, along with a React frontend",
     "main": "server.js",
     "scripts": {
-      "start": "concurrently \"node server.js\" \"node bot.js\"",
-      "build": "cd frontend && npm run build",
-      "render-build": "npm run build"
+      "start": "node server.js",
+      "dev": "concurrently \"node server.js\" \"node bot.js\"",
+      "bot": "node bot.js"
     },
     "dependencies": {
       "ejs": "^3.1.8",
