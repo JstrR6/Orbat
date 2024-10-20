@@ -3,9 +3,12 @@ const path = require('path');
 const { initializeDiscordBot } = require('./server');
 const { getOrbatStructure, getLeadershipAssignments, updateLeadership } = require('./orbatdata');
 const militaryRanks = require('./ranks');
+const connectDB = require('./db');
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+connectDB();
 
 // Initialize Discord Bot
 const discordClient = initializeDiscordBot();
@@ -53,27 +56,17 @@ app.get('/orders', (req, res) => {
 app.post('/api/update-leadership', async (req, res) => {
   const { unitId, position, name } = req.body;
   try {
-    const leadershipAssignments = await getLeadershipAssignments();
-    
-    if (leadershipAssignments[unitId] && leadershipAssignments[unitId].hasOwnProperty(position)) {
-      leadershipAssignments[unitId][position] = name;
-      
-      // Write updated assignments back to the file
-      await fs.writeFile(
-        path.join(__dirname, 'leadershipAssignments.json'),
-        JSON.stringify(leadershipAssignments, null, 2)
-      );
-      
+    const success = await updateLeadership(unitId, position, name);
+    if (success) {
       res.json({ message: 'Leadership updated successfully' });
     } else {
-      res.status(400).json({ message: 'Invalid unit ID or position' });
+      res.status(400).json({ message: 'Failed to update leadership' });
     }
   } catch (error) {
     console.error('Error updating leadership:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 app.get('/api/orbat', async (req, res) => {
   try {
     const structure = await getOrbatStructure();
