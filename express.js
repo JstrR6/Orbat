@@ -5,8 +5,15 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const mongoose = require('mongoose');
 const fetch = require('node-fetch');
 const path = require('path');
+const expressLayouts = require('express-ejs-layouts');
 
 const app = express();
+
+// Middleware for logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
 
 // Ensure all environment variables are set
 const requiredEnvVars = ['MONGODB_URI', 'DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'DISCORD_CALLBACK_URL', 'SESSION_SECRET'];
@@ -138,39 +145,55 @@ app.use(passport.session());
 // Set up EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(expressLayouts);
+app.set('layout', 'layout');
 
 // Routes
 app.get('/', (req, res) => {
-    res.redirect('/login');
+  res.redirect('/login');
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.get('/auth/discord', passport.authenticate('discord'));
+
+app.get('/auth/discord/callback', passport.authenticate('discord', {
+  failureRedirect: '/login'
+}), (req, res) => {
+  res.redirect('/dashboard');
+});
+
+app.get('/dashboard', ensureAuthenticated, (req, res) => {
+  res.render('dashboard', { user: req.user });
+});
+
+app.get('/logout', (req, res, next) => {
+  req.logout((err) => {
+    if (err) { return next(err); }
+    res.redirect('/');
   });
-  
-  app.get('/login', (req, res) => {
-    res.render('login');
-  });
-  
-  app.get('/auth/discord', passport.authenticate('discord'));
-  
-  app.get('/auth/discord/callback', passport.authenticate('discord', {
-    failureRedirect: '/login'
-  }), (req, res) => {
-    res.redirect('/dashboard');
-  });
-  
-  app.get('/dashboard', ensureAuthenticated, (req, res) => {
-    res.render('dashboard', { user: req.user });
-  });
-  
-  app.get('/logout', (req, res, next) => {
-    req.logout((err) => {
-      if (err) { return next(err); }
-      res.redirect('/');
-    });
-  });
-  
-  // Catch-all route for 404 errors
-  app.use((req, res) => {
-    res.status(404).send("Sorry, that route doesn't exist.");
-  });
+});
+
+// Middleware to ensure user is authenticated
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login');
+}
+
+// Catch-all route for 404 errors
+app.use((req, res) => {
+  res.status(404).send("Sorry, that route doesn't exist.");
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
 
 // Start the server
 const PORT = process.env.PORT || 3000;
