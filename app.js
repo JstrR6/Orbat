@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { initializeDiscordBot } = require('./server');
-const { getOrbatStructure, getLeadershipAssignments, updateLeadership } = require('./orbatdata');
+const orbatData = require('./orbatdata');
 const militaryRanks = require('./ranks');
 const connectDB = require('./db');
 
@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 
 connectDB().then(() => {
   // Initialize ORBAT structure after database connection is established
-  initializeOrbatStructure();
+  orbatData.initializeOrbatStructure();
 });
 
 // Initialize Discord Bot
