@@ -34,67 +34,71 @@ async function updateLeadership(unitId, position, name) {
 
 async function getOrbatStructure() {
     try {
-      const rootUnit = await Orbat.findOne({ type: 'Army' }).lean();
-      
-      async function populateSubordinates(unit) {
-        if (unit.subordinates && unit.subordinates.length > 0) {
-          const populatedSubordinates = await Promise.all(
-            unit.subordinates.map(async (subId) => {
-              const subUnit = await Orbat.findById(subId).lean();
-              return await populateSubordinates(subUnit);
-            })
-          );
-          unit.subordinates = populatedSubordinates;
-        }
-        return unit;
+      const rootUnit = await Orbat.findOne({ type: 'Army' });
+      if (!rootUnit) {
+        console.error('Root unit not found');
+        return null;
       }
   
-      const fullStructure = await populateSubordinates(rootUnit);
-      return fullStructure;
+      async function populateSubordinates(unitId) {
+        const unit = await Orbat.findById(unitId);
+        if (!unit) return null;
+  
+        const populatedUnit = unit.toObject();
+        if (unit.subordinates && unit.subordinates.length > 0) {
+          populatedUnit.subordinates = await Promise.all(
+            unit.subordinates.map(subId => populateSubordinates(subId))
+          );
+        }
+        return populatedUnit;
+      }
+  
+      return await populateSubordinates(rootUnit._id);
     } catch (error) {
       console.error('Error fetching ORBAT structure:', error);
       return null;
     }
   }
 
-async function initializeOrbatStructure() {
-  try {
-    const existingStructure = await Orbat.findOne({ type: 'Army' });
-    if (existingStructure) {
-      console.log('ORBAT structure already initialized');
-      return;
-    }
-
-    const jsonPath = path.join(__dirname, 'orbatStructure.json');
-    const jsonData = await fs.readFile(jsonPath, 'utf8');
-    const orbatData = JSON.parse(jsonData);
-
-    async function createUnit(unitData) {
-      const unit = new Orbat({
-        id: unitData.id,
-        name: unitData.name,
-        type: unitData.type
-      });
-
-      if (unitData.subordinates && unitData.subordinates.length > 0) {
-        const subordinateIds = [];
-        for (const subordinate of unitData.subordinates) {
-          const subordinateUnit = await createUnit(subordinate);
-          subordinateIds.push(subordinateUnit._id);
-        }
-        unit.subordinates = subordinateIds;
+  async function initializeOrbatStructure() {
+    try {
+      const existingStructure = await Orbat.findOne({ type: 'Army' });
+      if (existingStructure) {
+        console.log('ORBAT structure already initialized');
+        return;
       }
-
-      await unit.save();
-      return unit;
+  
+      const jsonPath = path.join(__dirname, 'orbatStructure.json');
+      const jsonData = await fs.readFile(jsonPath, 'utf8');
+      const orbatData = JSON.parse(jsonData);
+  
+      async function createUnit(unitData) {
+        const unit = new Orbat({
+          id: unitData.id,
+          name: unitData.name,
+          type: unitData.type,
+          subordinates: []
+        });
+  
+        await unit.save();
+  
+        if (unitData.subordinates && unitData.subordinates.length > 0) {
+          for (const subordinateData of unitData.subordinates) {
+            const subordinateUnit = await createUnit(subordinateData);
+            unit.subordinates.push(subordinateUnit._id);
+          }
+          await unit.save();
+        }
+  
+        return unit;
+      }
+  
+      await createUnit(orbatData);
+      console.log('ORBAT structure initialized');
+    } catch (error) {
+      console.error('Error initializing ORBAT structure:', error);
     }
-
-    await createUnit(orbatData);
-    console.log('ORBAT structure initialized');
-  } catch (error) {
-    console.error('Error initializing ORBAT structure:', error);
   }
-}
 
 module.exports = { 
   getOrbatStructure, 
