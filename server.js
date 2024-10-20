@@ -2,7 +2,8 @@ const express = require('express');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const mongoose = require('mongoose');
-const session = require('express-session'); // Add express-session
+const session = require('express-session');
+const path = require('path');  // Add 'path' for serving React build
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -70,7 +71,7 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Routes
+// Routes for Discord OAuth
 app.get('/verify/:id', (req, res) => {
   res.redirect('/auth/discord');
 });
@@ -81,12 +82,21 @@ app.get('/callback', passport.authenticate('discord', { failureRedirect: '/' }),
   res.send('Successfully verified! You can close this window.');
 });
 
+// Serve static React app
+app.use(express.static(path.join(__dirname, 'frontend', 'build')));
+
+// Fallback route for React (to ensure that React Router works correctly)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'build', 'index.html'));
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
   res.status(500).send('Internal Server Error');
 });
 
+// Start the server
 app.listen(process.env.PORT || 3000, () => {
   console.log('Server running');
 });

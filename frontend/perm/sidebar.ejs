@@ -1,0 +1,16 @@
+<aside>
+    <ul>
+      <li><a href="/dashboard">Dashboard</a></li>
+      <li><a href="/orbat">Orbat</a></li>
+      <li><a href="/forms">Forms</a></li>
+      <li><a href="/orders">Orders By The General</a></li>
+  
+      <% if (userRole === 'Commissioned Officer') { %>
+        <li><a href="/users">Users</a></li>
+      <% } %>
+      <% if (userRole === 'High Command') { %>
+        <li><a href="/general-panel">General Panel</a></li>
+      <% } %>
+    </ul>
+  </aside>
+  

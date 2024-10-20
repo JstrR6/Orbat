@@ -1,10 +1,12 @@
 {
     "name": "discord-bot-oauth",
     "version": "1.0.0",
-    "description": "A Discord bot with OAuth verification and MongoDB integration",
-    "main": "server/server.js",
+    "description": "A Discord bot with OAuth verification and MongoDB integration, along with a React frontend",
+    "main": "server.js",
     "scripts": {
-      "start": "concurrently \"node server.js\" \"node bot.js\""
+      "start": "concurrently \"node server.js\" \"node bot.js\"",
+      "build": "cd frontend && npm run build",
+      "render-build": "npm run build"
     },
     "dependencies": {
       "discord.js": "^14.7.1", 
@@ -13,7 +15,8 @@
       "passport": "^0.6.0",
       "passport-discord": "^0.1.4",
       "express-session": "^1.17.3",
-      "concurrently": "^7.0.0"
+      "concurrently": "^7.0.0",
+      "path": "^0.12.7"
     },
     "engines": {
       "node": ">=16.6.0"
