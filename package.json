@@ -2,10 +2,10 @@
     "name": "discord-bot-oauth",
     "version": "1.0.0",
     "description": "A Discord bot with OAuth verification and MongoDB integration",
-    "main": "src/server/server.js",
+    "main": "server.js",
     "scripts": {
-      "start": "node src/server/server.js",
-      "bot": "node src/server/bot.js"
+      "start": "node server.js",
+      "bot": "node bot.js"
     },
     "dependencies": {
       "discord.js": "^14.7.1", 
