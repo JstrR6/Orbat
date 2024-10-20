@@ -20,7 +20,14 @@ requiredEnvVars.forEach(envVar => {
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
+
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+});
 
 // User model
 const UserSchema = new mongoose.Schema({
@@ -134,37 +141,36 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Routes
 app.get('/', (req, res) => {
+    res.redirect('/login');
+  });
+  
+  app.get('/login', (req, res) => {
+    res.render('login');
+  });
+  
+  app.get('/auth/discord', passport.authenticate('discord'));
+  
+  app.get('/auth/discord/callback', passport.authenticate('discord', {
+    failureRedirect: '/login'
+  }), (req, res) => {
     res.redirect('/dashboard');
   });
-
-app.get('/login', (req, res) => {
-  res.render('login');
-});
-
-app.get('/auth/discord', passport.authenticate('discord'));
-
-app.get('/auth/discord/callback', passport.authenticate('discord', {
-  failureRedirect: '/login'
-}), (req, res) => {
-  res.redirect('/dashboard');
-});
-
-app.get('/dashboard', ensureAuthenticated, (req, res) => {
-  res.render('dashboard', { user: req.user });
-});
-
-app.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/');
-});
-
-// Middleware to ensure user is authenticated
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect('/login');
-}
+  
+  app.get('/dashboard', ensureAuthenticated, (req, res) => {
+    res.render('dashboard', { user: req.user });
+  });
+  
+  app.get('/logout', (req, res, next) => {
+    req.logout((err) => {
+      if (err) { return next(err); }
+      res.redirect('/');
+    });
+  });
+  
+  // Catch-all route for 404 errors
+  app.use((req, res) => {
+    res.status(404).send("Sorry, that route doesn't exist.");
+  });
 
 // Start the server
 const PORT = process.env.PORT || 3000;
