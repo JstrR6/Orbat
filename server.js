@@ -46,7 +46,7 @@ passport.deserializeUser((id, done) => {
 passport.use(new DiscordStrategy({
     clientID: process.env.DISCORD_CLIENT_ID,
     clientSecret: process.env.DISCORD_CLIENT_SECRET,
-    callbackURL: process.env.DISCORD_CALLBACK_URL,
+    callbackURL: 'https://usm-dashboard.onrender.com/auth/discord/callback',
     scope: ['identify', 'guilds']
   },
   async (accessToken, refreshToken, profile, done) => {
@@ -93,8 +93,13 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/');
+  req.logout((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+      return res.redirect('/');
+    }
+    res.redirect('/');
+  });
 });
 
 // Error handling middleware
