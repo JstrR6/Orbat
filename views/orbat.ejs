@@ -69,11 +69,11 @@
                 <p class="text-xs">Senior Enlisted Leader: <%= leadership[structure.id]?.seniorEnlistedLeader || 'Not assigned' %></p>
                 <button onclick="showLeadershipForm('<%= structure.id %>')" class="text-xs text-blue-500 hover:text-blue-700">Update Leadership</button>
             </div>
-
-            <!-- Corps -->
+        
+            <!-- Loop through all corps (subordinates of 1st Army) -->
             <div class="corps-container">
                 <% structure.subordinates.forEach(corps => { %>
-                    <div class="unit-box">
+                    <div class="unit-box" id="<%= corps.id %>">
                         <h3 class="text-md font-semibold"><%= corps.name %></h3>
                         <p class="text-sm"><%= corps.type %></p>
                         <p class="text-xs">Commander: <%= leadership[corps.id]?.commander || 'Not assigned' %></p>
@@ -83,11 +83,11 @@
                         <button onclick="toggleDivisions('<%= corps.id %>')" class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs">
                             Expand Divisions
                         </button>
-
-                        <!-- Divisions -->
+        
+                        <!-- Loop through all divisions in each corps -->
                         <div id="divisions-<%= corps.id %>" class="divisions mt-4">
                             <% corps.subordinates.forEach(division => { %>
-                                <div class="unit-box mt-2">
+                                <div class="unit-box mt-2" id="<%= division.id %>">
                                     <h4 class="text-sm font-semibold"><%= division.name %></h4>
                                     <p class="text-xs"><%= division.type %></p>
                                     <p class="text-xs">Commander: <%= leadership[division.id]?.commander || 'Not assigned' %></p>
@@ -97,11 +97,11 @@
                                     <button onclick="toggleSquadrons('<%= division.id %>')" class="mt-1 bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-xs">
                                         Expand Squadrons
                                     </button>
-
-                                    <!-- Squadrons -->
+        
+                                    <!-- Loop through all squadrons in each division -->
                                     <div id="squadrons-<%= division.id %>" class="squadrons mt-2">
                                         <% division.subordinates.forEach(squadron => { %>
-                                            <div class="unit-box mt-1">
+                                            <div class="unit-box mt-1" id="<%= squadron.id %>">
                                                 <h5 class="text-xs font-semibold"><%= squadron.name %></h5>
                                                 <p class="text-xs"><%= squadron.type %></p>
                                                 <p class="text-xs">Commander: <%= leadership[squadron.id]?.commander || 'Not assigned' %></p>
