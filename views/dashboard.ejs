@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Bot Dashboard</h1>
+    <h2>Bot Statistics</h2>
+    <ul>
+        <li>Guilds: <%= guilds %></li>
+        <li>Users: <%= users %></li>
+        <li>Messages Processed: <%= messageCount %></li>
+        <li>Commands Processed: <%= commandCount %></li>
+    </ul>
+    
+    <h2>User Information</h2>
+    <p>Discord Username: <%= user.username %></p>
+    <p>Discord ID: <%= user.discordId %></p>
+    
+    <form action="/dashboard/update-user" method="POST">
+        <label for="highestRole">Highest Role:</label>
+        <input type="text" id="highestRole" name="highestRole" value="<%= user.highestRole %>">
+        
+        <label for="xp">XP:</label>
+        <input type="number" id="xp" name="xp" value="<%= user.xp %>">
+        
+        <button type="submit">Update</button>
+    </form>
+    
+    <a href="/logout">Logout</a>
+</body>
+</html>
