@@ -132,6 +132,50 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Protected route for dashboard
+app.get('/dashboard', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({
+      user: req.user,
+      message: "Welcome to the dashboard"
+    });
+  } else {
+    res.redirect('/auth/discord');
+  }
+});
+
+// Auth Routes
+app.get('/auth/discord', passport.authenticate('discord', {
+  scope: ['identify', 'email', 'guilds']
+}));
+
+app.get('/auth/discord/callback', 
+  passport.authenticate('discord', { 
+    failureRedirect: '/',
+    successRedirect: '/dashboard'
+  })
+);
+
+// Logout route
+app.get('/auth/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error logging out' });
+    }
+    res.redirect('/');
+  });
+});
+
+// API Routes
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/units', unitsRoutes);
+app.use('/api/forms', formsRoutes);
+
+// Error handler for undefined routes
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
