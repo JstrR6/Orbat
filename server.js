@@ -6,10 +6,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const DiscordStrategy = require('passport-discord').Strategy;
 
-// Import routes
-const dashboardRoutes = require('./client/server/src/routes/dashboard');
-const unitsRoutes = require('./client/server/src/routes/units');
-const formsRoutes = require('./client/server/src/routes/forms');
+// Import User model - Add this at the top
+const User = require('./client/server/src/models/User');
 
 const app = express();
 
@@ -20,7 +18,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Session
+// Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev_secret',
   resave: false,
@@ -33,95 +31,120 @@ app.use(session({
   proxy: process.env.NODE_ENV === 'production'
 }));
 
-// Passport setup
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Passport configuration
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  try {
+    done(null, user.id);
+  } catch (err) {
+    console.error('Serialize error:', err);
+    done(err, null);
+  }
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);
     done(null, user);
-  } catch (error) {
-    done(error, null);
+  } catch (err) {
+    console.error('Deserialize error:', err);
+    done(err, null);
   }
 });
 
+// Discord Strategy with detailed logging
 passport.use(new DiscordStrategy({
   clientID: process.env.DISCORD_CLIENT_ID,
   clientSecret: process.env.DISCORD_CLIENT_SECRET,
-  callbackURL: process.env.DISCORD_CALLBACK_URL || 'https://usm-dashboard.onrender.com/auth/discord/callback',
+  callbackURL: process.env.DISCORD_CALLBACK_URL,
   scope: ['identify', 'email', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    let user = await User.findOne({ discordId: profile.id });
+    console.log('Discord profile:', profile);
     
+    let user = await User.findOne({ discordId: profile.id });
+    console.log('Existing user:', user);
+
     if (!user) {
+      console.log('Creating new user for Discord ID:', profile.id);
       user = await User.create({
         username: profile.username,
         discordId: profile.id,
         email: profile.email,
         roles: ['member']
       });
+      console.log('New user created:', user);
     }
-    
+
     return done(null, user);
   } catch (error) {
+    console.error('Discord strategy error:', error);
     return done(error, null);
   }
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Auth Routes
-app.get('/auth/discord', passport.authenticate('discord'));
+// Auth Routes with error handling
+app.get('/auth/discord', (req, res, next) => {
+  console.log('Starting Discord auth');
+  passport.authenticate('discord')(req, res, next);
+});
 
 app.get('/auth/discord/callback', 
-  passport.authenticate('discord', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('/dashboard');
+  (req, res, next) => {
+    console.log('Received callback from Discord');
+    passport.authenticate('discord', (err, user, info) => {
+      if (err) {
+        console.error('Auth error:', err);
+        return res.status(500).json({ error: err.message });
+      }
+      if (!user) {
+        console.error('No user:', info);
+        return res.redirect('/auth/discord');
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error('Login error:', err);
+          return res.status(500).json({ error: err.message });
+        }
+        return res.redirect('/dashboard');
+      });
+    })(req, res, next);
   }
 );
 
-app.get('/auth/logout', (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error logging out' });
-    }
-    res.redirect('/');
-  });
-});
-
-// API Routes
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/units', unitsRoutes);
-app.use('/api/forms', formsRoutes);
-
-// Root route
-app.get('/', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.redirect('/dashboard');
-  } else {
-    res.redirect('/auth/discord');
-  }
-});
-
-// MongoDB Connection
+// MongoDB Connection with error handling
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
 
-// Error handling
+// Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  console.error('Global error handler:', err);
   res.status(500).json({ 
-    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message 
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+    details: process.env.NODE_ENV !== 'production' ? err.stack : undefined
   });
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('Callback URL:', process.env.DISCORD_CALLBACK_URL);
+});
+
+// Handle uncaught errors
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Promise Rejection:', err);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
 });
