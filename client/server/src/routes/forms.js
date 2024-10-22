@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const formController = require('../controllers/formController');
-const { isAuthenticated, hasRole } = require('../middleware/auth');
 
-router.post('/submit', isAuthenticated, formController.submitForm);
-router.get('/my-forms', isAuthenticated, formController.getFormsByUser);
-router.put('/:id/review', 
-  isAuthenticated, 
-  hasRole('High Command'), 
-  formController.reviewForm
-);
+// Test route
+router.get('/test', (req, res) => {
+  res.json({ message: 'Forms route working' });
+});
+
+// Get all forms
+router.get('/', (req, res) => {
+  res.json({ message: 'Get all forms endpoint' });
+});
 
 module.exports = router;
