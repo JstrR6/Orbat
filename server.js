@@ -3,7 +3,7 @@ const path = require('path');
 const app = express();
 
 // Serve static files from the React app's build directory
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Example API route (optional)
 app.get('/api/example', (req, res) => {
