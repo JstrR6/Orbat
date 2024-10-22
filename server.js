@@ -12,7 +12,7 @@ app.get('/api/example', (req, res) => {
 
 // React routing: return React app for any route not starting with /api
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Set port for the server (use process.env.PORT for production environments)
