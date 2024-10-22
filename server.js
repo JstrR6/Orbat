@@ -1,6 +1,7 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const session = require('express-session');
+const passport = require('passport');
+const mongoose = require('mongoose');
 const path = require('path');
 const auth = require('./auth');
 const dashboardRoutes = require('./dashboard');
@@ -23,9 +24,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Set view engine
 app.set('view engine', 'ejs');
@@ -37,16 +42,22 @@ app.get('/', (req, res) => {
 });
 
 // Auth routes
-app.get('/login', (req, res) => {
-  const { token } = req.query;
-  res.render('login', { token });
+app.get('/auth/discord', passport.authenticate('discord'));
+app.get('/auth/discord/callback', passport.authenticate('discord', {
+  failureRedirect: '/login'
+}), (req, res) => {
+  res.redirect('/dashboard');
 });
 
-app.post('/login', auth.authenticate);
+app.get('/login', (req, res) => {
+  res.render('login');
+});
 
 app.get('/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/');
+  req.logout((err) => {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
 });
 
 // Dashboard routes
