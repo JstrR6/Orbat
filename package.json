@@ -1,6 +1,7 @@
 {
     "name": "orbat",
     "version": "1.0.0",
+    "main": "server.js",
     "scripts": {
       "start": "concurrently \"node server.js\" \"node bot.js\"",
       "dev": "concurrently \"nodemon server.js\" \"nodemon bot.js\"",
