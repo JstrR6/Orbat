@@ -1,11 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import NavBar from './components/NavBar';
 import Home from './pages/Home';
 import Units from './pages/Units';
 import Forms from './pages/Forms';
+import NavBar from './components/NavBar';
 
-const App = () => {
+function App() {
   return (
     <Router>
       <NavBar />
@@ -16,6 +16,6 @@ const App = () => {
       </Routes>
     </Router>
   );
-};
+}
 
 export default App;
