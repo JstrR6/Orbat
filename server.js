@@ -37,56 +37,51 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Health check route
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok',
-    env: process.env.NODE_ENV || 'development',
-    timestamp: new Date().toISOString()
-  });
-});
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'client/src')));
 
-// API routes with error handling
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/units', unitsRoutes);
 app.use('/api/forms', formsRoutes);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ 
-    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message 
-  });
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+// Serve React frontend for any non-API routes
+app.get('*', (req, res) => {
+  // Create a simple HTML page that loads your React components
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>USM Dashboard</title>
+        <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+        <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="text/babel" src="/components/Layout.jsx"></script>
+        <script type="text/babel">
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(
+                <React.StrictMode>
+                    <Layout />
+                </React.StrictMode>
+            );
+        </script>
+    </body>
+    </html>
+  `);
 });
-
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log('Routes loaded:', {
-    auth: '/api/auth',
-    units: '/api/units',
-    forms: '/api/forms'
-  });
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Promise Rejection:', err);
-});
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  process.exit(1);
 });
