@@ -4,10 +4,10 @@ const session = require('express-session');
 const passport = require('passport');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const DiscordStrategy = require('passport-discord').Strategy;
 
 // Import routes
-const authRoutes = require('./client/server/src/routes/auth');
-const dashboardRoutes = require('./client/server/src/routes/dashboard'); // Add this
+const dashboardRoutes = require('./client/server/src/routes/dashboard');
 const unitsRoutes = require('./client/server/src/routes/units');
 const formsRoutes = require('./client/server/src/routes/forms');
 
@@ -33,22 +33,78 @@ app.use(session({
   proxy: process.env.NODE_ENV === 'production'
 }));
 
-// Initialize Passport
+// Passport setup
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
+
+passport.use(new DiscordStrategy({
+  clientID: process.env.DISCORD_CLIENT_ID,
+  clientSecret: process.env.DISCORD_CLIENT_SECRET,
+  callbackURL: '/auth/discord/callback',
+  scope: ['identify', 'email', 'guilds']
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    let user = await User.findOne({ discordId: profile.id });
+    
+    if (!user) {
+      user = await User.create({
+        username: profile.username,
+        discordId: profile.id,
+        email: profile.email,
+        roles: ['member']
+      });
+    }
+    
+    return done(null, user);
+  } catch (error) {
+    return done(error, null);
+  }
+}));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/dashboard', dashboardRoutes); // Add this
+// Auth Routes
+app.get('/auth/discord', passport.authenticate('discord'));
+
+app.get('/auth/discord/callback', 
+  passport.authenticate('discord', { failureRedirect: '/' }),
+  (req, res) => {
+    res.redirect('/dashboard');
+  }
+);
+
+app.get('/auth/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error logging out' });
+    }
+    res.redirect('/');
+  });
+});
+
+// API Routes
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/units', unitsRoutes);
 app.use('/api/forms', formsRoutes);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok',
-    timestamp: new Date().toISOString() 
-  });
+// Root route
+app.get('/', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.redirect('/dashboard');
+  } else {
+    res.redirect('/auth/discord');
+  }
 });
 
 // MongoDB Connection
