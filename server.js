@@ -50,7 +50,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new DiscordStrategy({
   clientID: process.env.DISCORD_CLIENT_ID,
   clientSecret: process.env.DISCORD_CLIENT_SECRET,
-  callbackURL: '/auth/discord/callback',
+  callbackURL: process.env.DISCORD_CALLBACK_URL || 'https://usm-dashboard.onrender.com/auth/discord/callback',
   scope: ['identify', 'email', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
