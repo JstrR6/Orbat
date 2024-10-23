@@ -88,7 +88,7 @@ app.get('/auth/discord/callback',
 
 app.get('/auth/loading', (req, res) => {
     if (!req.isAuthenticated()) {
-        return res.redirect('/login');
+        return res.redirect('/dashboard');
     }
     res.render('loading');
 });
