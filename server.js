@@ -65,8 +65,8 @@ app.use('/dashboard', auth.ensureAuthenticated, dashboardRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+  console.error('Error details:', err);
+  res.status(500).send('Something broke! Error: ' + err.message);
 });
 
 // Start the server

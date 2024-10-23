@@ -27,7 +27,7 @@ passport.use(new DiscordStrategy({
       user = new User({
         discordId: profile.id,
         username: profile.username,
-        highestRole: 'Member', // Default role
+        highestRole: 'Member',
         xp: 0
       });
     } else {

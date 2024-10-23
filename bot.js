@@ -1,5 +1,5 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-const { createOrUpdateUser } = require('./auth');
+const User = require('./models/User');
 
 const client = new Client({
   intents: [
@@ -30,17 +30,9 @@ client.on('messageCreate', async message => {
   }
 
   if (message.content === '!login') {
-    const member = message.guild.members.cache.get(message.author.id);
-    const highestRole = member.roles.highest.name;
-    const token = await createOrUpdateUser(message.author.id, message.author.username, highestRole);
-    
-    if (token) {
-      const loginUrl = `${process.env.WEBSITE_URL}/login?token=${token}`;
-      message.author.send(`Click here to log in to the dashboard: ${loginUrl}`);
-      message.reply('I\'ve sent you a DM with the login link!');
-    } else {
-      message.reply('Sorry, there was an error generating your login link. Please try again later.');
-    }
+    const loginUrl = `${process.env.WEBSITE_URL}/auth/discord`;
+    message.author.send(`Click here to log in to the dashboard: ${loginUrl}`);
+    message.reply('I\'ve sent you a DM with the login link!');
   }
 
   // Add XP for each message
