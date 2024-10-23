@@ -70,20 +70,42 @@ passport.use(new DiscordStrategy({
     scope: ['identify', 'guilds', 'guilds.members.read']
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        console.log('Profile:', profile); // Debug log
+        console.log('Received profile:', profile);
         
         let user = await User.findOne({ discordId: profile.id });
         if (!user) {
             user = new User({
                 discordId: profile.id,
                 username: profile.username,
-                roles: [], // Initialize with empty array
+                roles: [],
                 highestRole: null
             });
         }
-        
-        // Save the user first
+
+        // Save basic user info first
         await user.save();
+
+        // Now fetch guild member data
+        try {
+            const response = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${profile.id}`, {
+                headers: {
+                    Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`
+                }
+            });
+
+            if (response.ok) {
+                const memberData = await response.json();
+                console.log('Member data:', memberData);
+
+                // Update user with roles
+                user.roles = memberData.roles;
+                user.highestRole = memberData.roles.length > 0 ? Math.max(...memberData.roles) : null;
+                await user.save();
+            }
+        } catch (error) {
+            console.error('Error fetching guild member data:', error);
+        }
+
         return done(null, user);
     } catch (error) {
         console.error('Auth Error:', error);

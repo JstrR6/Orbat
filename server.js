@@ -78,8 +78,38 @@ app.get('/login', (req, res) => {
 
 // Auth routes
 app.get('/auth/discord', passport.authenticate('discord'));
-app.get('/auth/discord/callback', passport.authenticate('discord'), (req, res) => {
-    res.redirect('/dashboard');
+
+app.get('/auth/discord/callback', 
+    passport.authenticate('discord'), 
+    (req, res) => {
+        res.redirect('/auth/loading');
+    }
+);
+
+app.get('/auth/loading', (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect('/login');
+    }
+    res.render('loading');
+});
+
+app.get('/auth/status', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.json({ ready: false });
+    }
+
+    try {
+        const user = await User.findOne({ discordId: req.user.discordId });
+        // Check if we have all the required data
+        if (user && user.roles && user.highestRole) {
+            res.json({ ready: true });
+        } else {
+            res.json({ ready: false });
+        }
+    } catch (error) {
+        console.error('Status check error:', error);
+        res.json({ ready: false });
+    }
 });
 
 app.get('/logout', (req, res) => {
