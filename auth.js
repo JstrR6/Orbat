@@ -2,6 +2,7 @@ const User = require('./models/User');
 const crypto = require('crypto');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
+const { client } = require('./bot');  // Import the Discord client from your bot file
 
 const generateToken = () => {
   return crypto.randomBytes(20).toString('hex');
@@ -63,20 +64,47 @@ passport.use(new DiscordStrategy({
   clientID: process.env.DISCORD_CLIENT_ID,
   clientSecret: process.env.DISCORD_CLIENT_SECRET,
   callbackURL: process.env.DISCORD_CALLBACK_URL,
-  scope: ['identify']
+  scope: ['identify', 'guilds']  // Added 'guilds' scope to get server info
 }, async (accessToken, refreshToken, profile, done) => {
   try {
+    // Find the highest role across all mutual servers
+    let highestRole = 'Member';  // Default role
+    let highestPosition = -1;
+
+    // Loop through the user's guilds (servers)
+    for (const guild of profile.guilds) {
+      const botGuild = client.guilds.cache.get(guild.id);
+      if (botGuild) {  // If the bot is in this server
+        const member = await botGuild.members.fetch(profile.id).catch(() => null);
+        if (member) {
+          const topRole = member.roles.highest;
+          if (topRole && topRole.position > highestPosition) {
+            highestPosition = topRole.position;
+            highestRole = topRole.name;
+          }
+        }
+      }
+    }
+
+    // Find or create user in database
     let user = await User.findOne({ discordId: profile.id });
     if (!user) {
       user = await User.create({
         discordId: profile.id,
         username: profile.username,
-        highestRole: 'Member',
+        highestRole: highestRole,
         xp: 0
       });
+    } else {
+      // Update existing user's role if it changed
+      user.highestRole = highestRole;
+      user.username = profile.username;
+      await user.save();
     }
+
     return done(null, user);
   } catch (err) {
+    console.error('Auth error:', err);
     return done(err, null);
   }
 }));

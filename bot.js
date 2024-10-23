@@ -7,7 +7,9 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
-  ],
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages
+  ] // Removed extra ]
 });
 
 // Bot statistics
