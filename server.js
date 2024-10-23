@@ -6,6 +6,7 @@ const path = require('path');
 const auth = require('./auth');
 const dashboardRoutes = require('./dashboard');
 const User = require('./models/User');
+const passport = require('passport');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -48,6 +49,9 @@ app.set('trust proxy', 1);
 app.get('/', (req, res) => {
   res.redirect('/login');
 });
+
+// Discord authentication routes
+app.get('/auth/discord', passport.authenticate('discord'));
 
 // Auth routes
 app.get('/auth/discord/callback', 

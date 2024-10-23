@@ -87,7 +87,4 @@ passport.use(new DiscordStrategy({
   }
 }));
 
-module.exports = { 
-  ensureAuthenticated,
-  passport // Add this line
-};
+module.exports = passport;
