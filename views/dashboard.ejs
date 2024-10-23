@@ -26,7 +26,7 @@
         <div class="w-64 bg-gray-800 p-4">
             <h1 class="text-2xl font-bold mb-6 text-center">US Military Dashboard</h1>
             <nav>
-                <button class="w-full flex items-center text-left px-4 py-2 mb-2 rounded hover:bg-gray-700 bg-gray-700">
+                <button class="w-full flex items-center text-left px-4 py-2 mb-2 rounded hover:bg-gray-700">
                     <i data-lucide="layout-dashboard" class="mr-2 h-4 w-4"></i>
                     Dashboard
                 </button>
@@ -34,7 +34,7 @@
                     <i data-lucide="users" class="mr-2 h-4 w-4"></i>
                     ORBAT
                 </button>
-                <button class="w-full flex items-center text-left px-4 py-2 mb-2 rounded hover:bg-gray-700">
+                <button class="w-full flex items-center text-left px-4 py-2 mb-2 rounded hover:bg-gray-700 bg-gray-700">
                     <i data-lucide="file-text" class="mr-2 h-4 w-4"></i>
                     Forms
                 </button>
@@ -132,20 +132,31 @@
     </div>
 
     <script>
-        // Initialize Lucide icons
         lucide.createIcons();
 
-        // Handle tab switching
-        document.querySelectorAll('nav button').forEach(button => {
-            button.addEventListener('click', () => {
-                // Remove active state from all buttons
-                document.querySelectorAll('nav button').forEach(btn => {
-                    btn.classList.remove('bg-gray-700');
-                });
-                // Add active state to clicked button
-                button.classList.add('bg-gray-700');
-            });
+    // Handle navigation
+    document.querySelectorAll('nav button').forEach(button => {
+        button.addEventListener('click', () => {
+            const page = button.textContent.trim().toLowerCase();
+            switch(page) {
+                case 'dashboard':
+                    window.location.href = '/';
+                    break;
+                case 'forms':
+                    window.location.href = '/forms';
+                    break;
+                case 'orbat':
+                    window.location.href = '/orbat';
+                    break;
+                case 'profile':
+                    window.location.href = '/profile';
+                    break;
+                case 'settings':
+                    window.location.href = '/settings';
+                    break;
+            }
         });
+    });
     </script>
 </body>
 </html>
