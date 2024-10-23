@@ -19,10 +19,10 @@ const client = new Client({
 
 // Configuration - Replace these with your values
 const config = {
-    clientID: 'CLIENT_ID',
-    clientSecret: 'CLIENT_SECRET',
-    botToken: 'BOT_TOKEN',
-    callbackURL: 'https://usm-dashboard.onrender.com/auth/callback',
+    clientID: 'YOUR_CLIENT_ID',
+    clientSecret: 'YOUR_CLIENT_SECRET',
+    botToken: 'YOUR_BOT_TOKEN',
+    callbackURL: 'http://your-domain.com/auth/callback',
 };
 
 // Passport configuration
@@ -58,8 +58,8 @@ client.on('messageCreate', async message => {
 
             // Create embed
             const embed = new EmbedBuilder()
-                .setTitle('USM Dashboard')
-                .setDescription(`Click [here](${loginURL}) to login!`)
+                .setTitle('Website Login')
+                .setDescription(`Click [here](${loginURL}) to login to our website!`)
                 .setColor('#7289DA')
                 .setTimestamp();
 
