@@ -30,8 +30,7 @@ const ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  // Instead of redirecting, send a 401 status
-  res.status(401).json({ error: 'Unauthorized' });
+  res.redirect('/login');
 };
 
 const createOrUpdateUser = async (discordId, username, highestRole) => {
@@ -77,14 +76,17 @@ passport.use(new DiscordStrategy({
       user = new User({
         discordId: profile.id,
         username: profile.username,
-        // Add other fields as needed
+        highestRole: 'Member',
+        xp: 0
       });
-      await user.save();
+    } else {
+      user.username = profile.username;
     }
+    await user.save();
     return done(null, user);
   } catch (err) {
     return done(err, null);
   }
 }));
 
-module.exports = passport;
+module.exports = { passport, ensureAuthenticated };

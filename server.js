@@ -1,12 +1,10 @@
 const express = require('express');
 const session = require('express-session');
-const { passport } = require('./auth');
 const mongoose = require('mongoose');
 const path = require('path');
-const auth = require('./auth');
+const { passport, ensureAuthenticated } = require('./auth');
 const dashboardRoutes = require('./dashboard');
 const User = require('./models/User');
-const passport = require('passport');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,14 +20,12 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',  // Make sure this is only true when in production
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -42,26 +38,14 @@ app.use(passport.session());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Trust proxy
-app.set('trust proxy', 1);
-
 // Routes
 app.get('/', (req, res) => {
-  res.redirect('/login');
-});
-
-// Discord authentication routes
-app.get('/auth/discord', passport.authenticate('discord'));
-
-// Auth routes
-app.get('/auth/discord/callback', 
-  passport.authenticate('discord', { failureRedirect: '/login' }),
-  (req, res) => {
-    console.log('Authentication successful, user:', req.user);
-    console.log('Session:', req.session);
+  if (req.isAuthenticated()) {
     res.redirect('/dashboard');
+  } else {
+    res.redirect('/login');
   }
-);
+});
 
 app.get('/login', (req, res) => {
   if (req.isAuthenticated()) {
@@ -70,6 +54,18 @@ app.get('/login', (req, res) => {
     res.render('login', { user: req.user });
   }
 });
+
+// Discord authentication routes
+app.get('/auth/discord', passport.authenticate('discord'));
+
+app.get('/auth/discord/callback', 
+  passport.authenticate('discord', { failureRedirect: '/login' }),
+  (req, res) => {
+    console.log('Authentication successful, user:', req.user);
+    console.log('Session:', req.session);
+    res.redirect('/dashboard');
+  }
+);
 
 app.get('/logout', (req, res) => {
   req.logout((err) => {
@@ -81,16 +77,7 @@ app.get('/logout', (req, res) => {
 });
 
 // Dashboard routes
-app.get('/dashboard', auth.ensureAuthenticated, (req, res) => {
-  res.render('dashboard');  // Render the dashboard view directly here
-});
-
-app.use('/dashboard', (req, res, next) => {
-  if (!req.isAuthenticated()) {
-    return res.redirect('/login');
-  }
-  next();
-}, dashboardRoutes);
+app.use('/dashboard', ensureAuthenticated, dashboardRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
