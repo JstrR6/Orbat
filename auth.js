@@ -67,9 +67,8 @@ passport.use(new DiscordStrategy({
     clientID: process.env.DISCORD_CLIENT_ID,
     clientSecret: process.env.DISCORD_CLIENT_SECRET,
     callbackURL: process.env.DISCORD_CALLBACK_URL,
-    scope: ['identify', 'guilds', 'guilds.members.read']  // Added 'guilds'
-},
-async (accessToken, refreshToken, profile, done) => {
+    scope: ['identify', 'guilds', 'guilds.members.read']
+}, async (accessToken, refreshToken, profile, done) => {
     try {
         console.log('Profile:', profile); // Debug log
         
@@ -78,20 +77,16 @@ async (accessToken, refreshToken, profile, done) => {
             user = new User({
                 discordId: profile.id,
                 username: profile.username,
-                roles: profile.guilds ? profile.guilds[0].roles : [],
-                highestRole: profile.guilds ? Math.max(...profile.guilds[0].roles) : null
+                roles: [], // Initialize with empty array
+                highestRole: null
             });
-            await user.save();
-        } else {
-            if (profile.guilds) {
-                user.roles = profile.guilds[0].roles;
-                user.highestRole = Math.max(...profile.guilds[0].roles);
-                await user.save();
-            }
         }
+        
+        // Save the user first
+        await user.save();
         return done(null, user);
     } catch (error) {
-        console.error('Auth Error:', error); // Debug log
+        console.error('Auth Error:', error);
         return done(error, null);
     }
 }));
