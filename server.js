@@ -30,7 +30,10 @@ const requireHighCommand = (req, res, next) => {
     return res.redirect('/login');
   }
   
-  if (req.user.highestRole !== 'High Command') {
+  const hasHighCommand = req.user.roles && 
+    req.user.roles.some(role => role.name.toLowerCase() === 'high command');
+  
+  if (!hasHighCommand) {
     console.log('Unauthorized attempt to add order by:', req.user.username);
     return res.status(403).send('Only High Command can add orders');
   }
@@ -62,9 +65,15 @@ app.get('/dashboard', async (req, res) => {
   try {
     // Fetch all orders from the database
     const orders = await Order.find().sort({ createdAt: -1 });
+    
+    // Check for High Command role
+    const hasHighCommand = req.user.roles && 
+      req.user.roles.some(role => role.name.toLowerCase() === 'high command');
+
     res.render('dashboard', { 
       user: req.user,
-      orders: orders 
+      orders: orders,
+      hasHighCommand: hasHighCommand
     });
   } catch (error) {
     console.error('Error fetching orders:', error);
