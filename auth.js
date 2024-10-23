@@ -67,41 +67,34 @@ passport.use(new DiscordStrategy({
     clientID: process.env.DISCORD_CLIENT_ID,
     clientSecret: process.env.DISCORD_CLIENT_SECRET,
     callbackURL: process.env.DISCORD_CALLBACK_URL,
-    scope: ['identify', 'guilds', 'guilds.members.read']
+    scope: ['identify', 'guilds.members.read']
 },
 async (accessToken, refreshToken, profile, done) => {
     try {
-        // Get the user's guild (server) information
+        // Get user's roles from the guild
         const guild = profile.guilds.find(g => g.id === process.env.DISCORD_GUILD_ID);
         
         if (!guild) {
-            return done(null, false, { message: 'User is not a member of the required server' });
+            return done(null, false);
         }
-
-        // Convert guild permissions number to roles array
-        const roles = guild.roles || [];
-        const highestRole = Math.max(...roles);
 
         let user = await User.findOne({ discordId: profile.id });
         if (!user) {
-            user = await User.create({
+            user = new User({
                 discordId: profile.id,
                 username: profile.username,
-                discriminator: profile.discriminator,
-                avatar: profile.avatar,
-                roles: roles,
-                highestRole: highestRole
+                roles: guild.roles,
+                highestRole: Math.max(...guild.roles)
             });
+            await user.save();
         } else {
-            // Update existing user's roles
-            user.roles = roles;
-            user.highestRole = highestRole;
+            user.roles = guild.roles;
+            user.highestRole = Math.max(...guild.roles);
             await user.save();
         }
-        
         return done(null, user);
-    } catch (err) {
-        return done(err, null);
+    } catch (error) {
+        return done(error, null);
     }
 }));
 
