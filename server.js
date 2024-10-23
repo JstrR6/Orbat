@@ -50,10 +50,11 @@ app.get('/', (req, res) => {
 });
 
 // Auth routes
-app.get('/auth/discord/',
 app.get('/auth/discord/callback', 
   passport.authenticate('discord', { failureRedirect: '/login' }),
   (req, res) => {
+    console.log('Authentication successful, user:', req.user);
+    console.log('Session:', req.session);
     res.redirect('/dashboard');
   }
 );
