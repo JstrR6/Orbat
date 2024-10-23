@@ -69,6 +69,10 @@ app.get('/logout', (req, res) => {
 });
 
 // Dashboard routes
+app.get('/dashboard', auth.ensureAuthenticated, (req, res) => {
+  res.redirect('/dashboard/');  // This will then be handled by dashboardRoutes
+});
+
 app.use('/dashboard', auth.ensureAuthenticated, dashboardRoutes);
 
 // Error handling middleware
