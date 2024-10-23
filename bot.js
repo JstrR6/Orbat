@@ -1,7 +1,5 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
-const express = require('express');
-const passport = require('passport');
-const DiscordStrategy = require('passport-discord').Strategy;
+const config = require('./config');
 
 // Express app setup
 const app = express();
@@ -9,27 +7,21 @@ const port = 3000; // Change this to your preferred port
 
 // Discord bot setup
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.DirectMessages,
-    ]
+    intents: config.bot.intents.map(intent => GatewayIntentBits[intent])
 });
 
-// Configuration - Replace these with your values
-const config = {
-    clientID: 'YOUR_CLIENT_ID',
-    clientSecret: 'YOUR_CLIENT_SECRET',
-    botToken: 'YOUR_BOT_TOKEN',
-    callbackURL: 'http://your-domain.com/auth/callback',
-};
+// Make bot client available globally for auth.js
+global.botClient = client;
+config.discord.clientID
+config.discord.clientSecret
+config.discord.botToken
+config.discord.callbackURL
 
 // Passport configuration
 passport.use(new DiscordStrategy({
-    clientID: config.clientID,
-    clientSecret: config.clientSecret,
-    callbackURL: config.callbackURL,
+    clientID: discordConfig.clientID,
+    clientSecret: discordConfig.clientSecret,
+    callbackURL: discordConfig.callbackURL,
     scope: ['identify', 'email']
 }, function(accessToken, refreshToken, profile, cb) {
     return cb(null, profile);
@@ -51,10 +43,10 @@ app.listen(port, () => {
 
 // Bot commands
 client.on('messageCreate', async message => {
-    if (message.content.toLowerCase() === '!login') {
+    if (message.content.toLowerCase() === `${config.bot.prefix}login`) {
         try {
             // Create login URL
-            const loginURL = `https://discord.com/oauth2/authorize?client_id=${config.clientID}&redirect_uri=${encodeURIComponent(config.callbackURL)}&response_type=code&scope=identify%20email`;
+            const loginURL = `https://discord.com/oauth2/authorize?client_id=${discordConfig.clientID}&redirect_uri=${encodeURIComponent(discordConfig.callbackURL)}&response_type=code&scope=${config.oauth2Scopes.join('%20')}`;
 
             // Create embed
             const embed = new EmbedBuilder()
@@ -77,10 +69,41 @@ client.on('messageCreate', async message => {
     }
 });
 
-// Bot login
-client.login(config.botToken);
-
 // Bot ready event
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
+    
+    // Set bot activity
+    client.user.setActivity(config.bot.activity.name, { type: config.bot.activity.type });
+});
+
+// Error handling
+client.on('error', error => {
+    console.error('Discord client error:', error);
+});
+
+// Validate bot token before login
+if (!config.discord.botToken) {
+    console.error('Bot token is missing!');
+    process.exit(1);
+}
+
+// Bot login with debug logging
+console.log('Attempting bot login...');
+client.login(config.discord.botToken)
+    .then(() => console.log('Bot login successful!'))
+    .catch(error => {
+        console.error('Failed to login:', error);
+        process.exit(1);
+    });
+
+// Handle process termination
+process.on('SIGINT', () => {
+    console.log('Bot shutting down...');
+    client.destroy();
+    process.exit(0);
+});
+
+process.on('unhandledRejection', error => {
+    console.error('Unhandled promise rejection:', error);
 });

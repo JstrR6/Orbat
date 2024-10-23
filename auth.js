@@ -3,6 +3,15 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const config = require('./config');
 const { updateUserInfo, shouldUpdateUser } = require('./mongo');
 
+// Validate config before setting up passport
+console.log('Auth Configuration Check:');
+console.log('Client ID:', config.discord.clientID);
+console.log('Callback URL:', config.discord.callbackURL);
+
+if (!config.discord.clientID || !config.discord.clientSecret || !config.discord.callbackURL) {
+    throw new Error('Missing required Discord configuration');
+}
+
 // Define the scopes we need
 const DISCORD_SCOPES = [
     'identify',          // username, discriminator, avatar
@@ -22,9 +31,9 @@ passport.deserializeUser((user, done) => {
 
 // Setup Discord Strategy
 passport.use(new DiscordStrategy({
-    clientID: config.clientID,
-    clientSecret: config.clientSecret,
-    callbackURL: config.callbackURL,
+    clientID: config.discord.clientID,
+    clientSecret: config.discord.clientSecret,
+    callbackURL: config.discord.callbackURL,
     scope: DISCORD_SCOPES
 }, async (accessToken, refreshToken, profile, done) => {
     try {
