@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Same head as other pages -->
+    <title>Officer Training Form</title>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="flex h-screen">
+        <!-- Include the same sidebar -->
+        
+        <div class="flex-1 p-8 custom-scrollbar overflow-y-auto">
+            <h2 class="text-3xl font-bold mb-6">Officer Training Form</h2>
+            
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                    <form action="/forms/officer-training/submit" method="POST" class="space-y-6">
+                        <!-- Trainer ID -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">
+                                Trainer Discord ID (High Command Only)
+                            </label>
+                            <input 
+                                type="text" 
+                                name="trainerId" 
+                                required
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                placeholder="Enter trainer's Discord ID">
+                        </div>
+
+                        <!-- Attendee IDs -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">
+                                Officer Attendee Discord IDs (one per line)
+                            </label>
+                            <textarea 
+                                name="attendeeIds" 
+                                required
+                                rows="3"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                placeholder="Enter officer Discord IDs (one per line)"></textarea>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">
+                                Training Description
+                            </label>
+                            <textarea 
+                                name="description" 
+                                required
+                                rows="4"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"
+                                placeholder="Describe the training conducted and actions taken"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
+                            Submit Officer Training
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
