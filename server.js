@@ -38,7 +38,11 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Routes
 app.get('/', (req, res) => {
-  res.send('Welcome to my Discord bot website!');
+  if (req.isAuthenticated()) {
+    res.redirect('/dashboard');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 // Auth routes
