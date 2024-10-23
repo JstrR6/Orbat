@@ -15,6 +15,7 @@
     "mongoose": "^7.0.3",
     "ejs": "^3.1.9",
     "passport": "^0.6.0",
+    "connect-mongo": "^5.1.0",
     "passport-discord": "^0.1.4"
   },
   "devDependencies": {
