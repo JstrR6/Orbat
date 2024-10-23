@@ -6,29 +6,9 @@
     <title>Dashboard</title>
 </head>
 <body>
-    <h1>Bot Dashboard</h1>
-    <h2>Bot Statistics</h2>
-    <ul>
-        <li>Guilds: <%= guilds %></li>
-        <li>Users: <%= users %></li>
-        <li>Messages Processed: <%= messageCount %></li>
-        <li>Commands Processed: <%= commandCount %></li>
-    </ul>
-    
-    <h2>User Information</h2>
-    <p>Discord Username: <%= user.username %></p>
+    <h1>Welcome <%= user.username %></h1>
     <p>Discord ID: <%= user.discordId %></p>
-    
-    <form action="/dashboard/update-user" method="POST">
-        <label for="highestRole">Highest Role:</label>
-        <input type="text" id="highestRole" name="highestRole" value="<%= user.highestRole %>">
-        
-        <label for="xp">XP:</label>
-        <input type="number" id="xp" name="xp" value="<%= user.xp %>">
-        
-        <button type="submit">Update</button>
-    </form>
-    
-    <a href="/logout">Logout</a>
+    <p>Role: <%= user.highestRole %></p>
+    <p>XP: <%= user.xp %></p>
 </body>
 </html>
