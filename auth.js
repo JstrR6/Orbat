@@ -27,6 +27,9 @@ const authenticate = async (req, res, next) => {
 };
 
 const ensureAuthenticated = (req, res, next) => {
+  console.log('ensureAuthenticated called');
+  console.log('Is Authenticated:', req.isAuthenticated());
+  console.log('User:', req.user);
   if (req.isAuthenticated()) {
     return next();
   }
@@ -52,14 +55,18 @@ const createOrUpdateUser = async (discordId, username, highestRole) => {
 };
 
 passport.serializeUser((user, done) => {
+  console.log('Serializing user:', user);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
+  console.log('Deserializing user id:', id);
   try {
     const user = await User.findById(id);
+    console.log('Deserialized user:', user);
     done(null, user);
   } catch (err) {
+    console.error('Deserialization error:', err);
     done(err, null);
   }
 });

@@ -5,6 +5,8 @@ const { client, botStats } = require('./bot');
 
 // Root dashboard route
 router.get('/', async (req, res) => {
+  console.log('Dashboard root route hit');
+  console.log('User:', req.user);
   try {
     const user = await User.findById(req.user.id);
     const guilds = client.guilds.cache.size;

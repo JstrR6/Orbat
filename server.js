@@ -63,6 +63,7 @@ app.get('/auth/discord/callback',
   (req, res) => {
     console.log('Authentication successful, user:', req.user);
     console.log('Session:', req.session);
+    console.log('Is Authenticated:', req.isAuthenticated());
     res.redirect('/dashboard');
   }
 );
@@ -77,7 +78,16 @@ app.get('/logout', (req, res) => {
 });
 
 // Dashboard routes
-app.use('/dashboard', ensureAuthenticated, dashboardRoutes);
+app.use('/dashboard', (req, res, next) => {
+  console.log('Dashboard route hit');
+  console.log('Is Authenticated:', req.isAuthenticated());
+  console.log('User:', req.user);
+  if (!req.isAuthenticated()) {
+    console.log('User not authenticated, redirecting to login');
+    return res.redirect('/login');
+  }
+  next();
+}, dashboardRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
