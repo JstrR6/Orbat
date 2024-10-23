@@ -3,13 +3,11 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   discordId: String,
   username: String,
+  discriminator: String,
+  avatar: String,
+  roles: [String],
   highestRole: String,
-  roles: [{
-    name: String,
-    position: Number,
-    guildName: String
-  }],
-  xp: Number
+  xp: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model('User', userSchema);

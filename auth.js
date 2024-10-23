@@ -56,51 +56,51 @@ const createOrUpdateUser = async (discordId, username, highestRole) => {
 };
 
 passport.serializeUser((user, done) => {
-    console.log('Serializing user:', user.id);
-    done(null, user.id);
+    done(null, user);
 });
 
-passport.deserializeUser(async (id, done) => {
-    try {
-        console.log('Deserializing user:', id);
-        const user = await User.findById(id);
-        done(null, user);
-    } catch (err) {
-        console.error('Deserialization error:', err);
-        done(err, null);
-    }
+passport.deserializeUser((user, done) => {
+    done(null, user);
 });
 
 passport.use(new DiscordStrategy({
     clientID: process.env.DISCORD_CLIENT_ID,
     clientSecret: process.env.DISCORD_CLIENT_SECRET,
     callbackURL: process.env.DISCORD_CALLBACK_URL,
-    scope: ['identify', 'guilds']
+    scope: ['identify', 'guilds', 'guilds.members.read']
 },
 async (accessToken, refreshToken, profile, done) => {
     try {
-        console.log('Discord profile:', profile);
+        // Get the user's guild (server) information
+        const guild = profile.guilds.find(g => g.id === process.env.DISCORD_GUILD_ID);
         
+        if (!guild) {
+            return done(null, false, { message: 'User is not a member of the required server' });
+        }
+
+        // Convert guild permissions number to roles array
+        const roles = guild.roles || [];
+        const highestRole = Math.max(...roles);
+
         let user = await User.findOne({ discordId: profile.id });
-        
-        if (user) {
-            console.log('Existing user found:', user);
-            return done(null, user);
+        if (!user) {
+            user = await User.create({
+                discordId: profile.id,
+                username: profile.username,
+                discriminator: profile.discriminator,
+                avatar: profile.avatar,
+                roles: roles,
+                highestRole: highestRole
+            });
+        } else {
+            // Update existing user's roles
+            user.roles = roles;
+            user.highestRole = highestRole;
+            await user.save();
         }
         
-        // Create new user if doesn't exist
-        user = await User.create({
-            discordId: profile.id,
-            username: profile.username,
-            discriminator: profile.discriminator,
-            avatar: profile.avatar,
-            roles: [] // Initialize with empty roles array
-        });
-        
-        console.log('New user created:', user);
         return done(null, user);
     } catch (err) {
-        console.error('Authentication error:', err);
         return done(err, null);
     }
 }));

@@ -77,28 +77,11 @@ app.get('/login', (req, res) => {
 });
 
 // Discord authentication routes
-app.get('/auth/discord', passport.authenticate('discord', {
-    scope: ['identify', 'guilds']
-}));
+app.get('/auth/discord', passport.authenticate('discord'));
 
 app.get('/auth/discord/callback', 
-    passport.authenticate('discord', { 
-        failureRedirect: '/login',
-        keepSessionInfo: true
-    }), 
-    (req, res) => {
-        // Add debug logging
-        console.log('Authentication successful');
-        console.log('Session:', req.session);
-        console.log('User:', req.user);
-        
-        if (req.session.passport && req.session.passport.user) {
-            res.redirect('/dashboard');
-        } else {
-            console.log('No user in session after authentication');
-            res.redirect('/login');
-        }
-    }
+    passport.authenticate('discord', { failureRedirect: '/login' }), 
+    (req, res) => res.redirect('/dashboard')
 );
 
 app.get('/logout', (req, res) => {
