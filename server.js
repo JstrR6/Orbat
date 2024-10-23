@@ -27,8 +27,8 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { 
-    secure: process.env.NODE_ENV === 'production',
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',  // Make sure this is only true when in production
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -50,12 +50,9 @@ app.get('/', (req, res) => {
 });
 
 // Auth routes
-app.get('/auth/discord', passport.authenticate('discord'));
 app.get('/auth/discord/callback', 
   passport.authenticate('discord', { failureRedirect: '/login' }),
   (req, res) => {
-    console.log('Authentication successful, user:', req.user);
-    console.log('Session:', req.session);
     res.redirect('/dashboard');
   }
 );
@@ -79,7 +76,7 @@ app.get('/logout', (req, res) => {
 
 // Dashboard routes
 app.get('/dashboard', auth.ensureAuthenticated, (req, res) => {
-  res.redirect('/dashboard/');  // This will then be handled by dashboardRoutes
+  res.render('dashboard');  // Render the dashboard view directly here
 });
 
 app.use('/dashboard', (req, res, next) => {
