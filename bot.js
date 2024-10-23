@@ -1,10 +1,6 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const config = require('./config');
 
-// Express app setup
-const app = express();
-const port = 3000; // Change this to your preferred port
-
 // Discord bot setup
 const client = new Client({
     intents: config.bot.intents.map(intent => GatewayIntentBits[intent])
@@ -12,41 +8,13 @@ const client = new Client({
 
 // Make bot client available globally for auth.js
 global.botClient = client;
-config.discord.clientID
-config.discord.clientSecret
-config.discord.botToken
-config.discord.callbackURL
-
-// Passport configuration
-passport.use(new DiscordStrategy({
-    clientID: discordConfig.clientID,
-    clientSecret: discordConfig.clientSecret,
-    callbackURL: discordConfig.callbackURL,
-    scope: ['identify', 'email']
-}, function(accessToken, refreshToken, profile, cb) {
-    return cb(null, profile);
-}));
-
-// Express routes
-app.get('/auth/discord', passport.authenticate('discord'));
-
-app.get('/auth/callback', passport.authenticate('discord', {
-    failureRedirect: '/'
-}), function(req, res) {
-    res.redirect('/dashboard');
-});
-
-// Start Express server
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
 
 // Bot commands
 client.on('messageCreate', async message => {
     if (message.content.toLowerCase() === `${config.bot.prefix}login`) {
         try {
             // Create login URL
-            const loginURL = `https://discord.com/oauth2/authorize?client_id=${discordConfig.clientID}&redirect_uri=${encodeURIComponent(discordConfig.callbackURL)}&response_type=code&scope=${config.oauth2Scopes.join('%20')}`;
+            const loginURL = `https://discord.com/oauth2/authorize?client_id=${config.discord.clientID}&redirect_uri=${encodeURIComponent(config.discord.callbackURL)}&response_type=code&scope=${config.oauth2Scopes.join('%20')}`;
 
             // Create embed
             const embed = new EmbedBuilder()
@@ -72,8 +40,6 @@ client.on('messageCreate', async message => {
 // Bot ready event
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
-    
-    // Set bot activity
     client.user.setActivity(config.bot.activity.name, { type: config.bot.activity.type });
 });
 
@@ -88,10 +54,8 @@ if (!config.discord.botToken) {
     process.exit(1);
 }
 
-// Bot login with debug logging
-console.log('Attempting bot login...');
+// Bot login
 client.login(config.discord.botToken)
-    .then(() => console.log('Bot login successful!'))
     .catch(error => {
         console.error('Failed to login:', error);
         process.exit(1);

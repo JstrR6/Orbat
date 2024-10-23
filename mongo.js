@@ -1,11 +1,19 @@
 const mongoose = require('mongoose');
 const config = require('./config');
 
-// Connect to MongoDB
-mongoose.connect(config.mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+// Validate MongoDB URI
+if (!config.mongodb.uri) {
+    console.error('MongoDB URI is not defined in environment variables!');
+    process.exit(1);
+}
+
+// Connect to MongoDB with validation
+mongoose.connect(config.mongodb.uri, config.mongodb.options)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => {
+        console.error('MongoDB connection error:', err);
+        process.exit(1);
+    });
 
 // User Schema
 const userSchema = new mongoose.Schema({
