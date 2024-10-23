@@ -50,6 +50,7 @@ app.get('/', (req, res) => {
 });
 
 // Auth routes
+app.get('/auth/discord/',
 app.get('/auth/discord/callback', 
   passport.authenticate('discord', { failureRedirect: '/login' }),
   (req, res) => {
