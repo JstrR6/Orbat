@@ -25,13 +25,11 @@ app.use(express.urlencoded({ extended: true }));
 // Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET,
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    httpOnly: true,
-    sameSite: 'lax'
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 
@@ -48,11 +46,7 @@ app.set('trust proxy', 1);
 
 // Routes
 app.get('/', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.redirect('/dashboard');
-  } else {
-    res.redirect('/login');
-  }
+  res.redirect('/login');
 });
 
 // Auth routes
@@ -67,13 +61,19 @@ app.get('/auth/discord/callback',
 );
 
 app.get('/login', (req, res) => {
-  res.render('login', { user: req.user });
+  if (req.isAuthenticated()) {
+    res.redirect('/dashboard');
+  } else {
+    res.render('login', { user: req.user });
+  }
 });
 
 app.get('/logout', (req, res) => {
   req.logout((err) => {
     if (err) { return next(err); }
-    res.redirect('/');
+    req.session.destroy((err) => {
+      res.redirect('/');
+    });
   });
 });
 
@@ -82,7 +82,12 @@ app.get('/dashboard', auth.ensureAuthenticated, (req, res) => {
   res.redirect('/dashboard/');  // This will then be handled by dashboardRoutes
 });
 
-app.use('/dashboard', auth.ensureAuthenticated, dashboardRoutes);
+app.use('/dashboard', (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect('/login');
+  }
+  next();
+}, dashboardRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

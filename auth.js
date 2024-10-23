@@ -30,7 +30,8 @@ const ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.redirect('/login');
+  // Instead of redirecting, send a 401 status
+  res.status(401).json({ error: 'Unauthorized' });
 };
 
 const createOrUpdateUser = async (discordId, username, highestRole) => {
@@ -70,24 +71,18 @@ passport.use(new DiscordStrategy({
   callbackURL: process.env.DISCORD_CALLBACK_URL,
   scope: ['identify', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
-  console.log('Discord profile:', profile);
   try {
     let user = await User.findOne({ discordId: profile.id });
     if (!user) {
       user = new User({
         discordId: profile.id,
         username: profile.username,
-        highestRole: 'Member',
-        xp: 0
+        // Add other fields as needed
       });
-    } else {
-      user.username = profile.username;
+      await user.save();
     }
-    await user.save();
-    console.log('User saved:', user);
     return done(null, user);
   } catch (err) {
-    console.error('Discord strategy error:', err);
     return done(err, null);
   }
 }));
