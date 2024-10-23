@@ -4,6 +4,11 @@ const userSchema = new mongoose.Schema({
   discordId: String,
   username: String,
   highestRole: String,
+  roles: [{
+    name: String,
+    position: Number,
+    guildName: String
+  }],
   xp: Number
 });
 

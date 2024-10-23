@@ -3,6 +3,7 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const { passport } = require('./auth');
 const User = require('./models/User');
+const Order = require('./models/Order');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,21 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.set('view engine', 'ejs');
+app.use(express.urlencoded({ extended: true }));
+
+// Middleware to check for High Command role
+const requireHighCommand = (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect('/login');
+  }
+  
+  if (req.user.highestRole !== 'High Command') {
+    console.log('Unauthorized attempt to add order by:', req.user.username);
+    return res.status(403).send('Only High Command can add orders');
+  }
+  
+  next();
+};
 
 // Routes
 app.get('/', (req, res) => res.redirect('/login'));
@@ -39,11 +55,43 @@ app.get('/auth/discord/callback',
   (req, res) => res.redirect('/dashboard')
 );
 
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect('/login');
   }
-  res.render('dashboard', { user: req.user });
+  try {
+    // Fetch all orders from the database
+    const orders = await Order.find().sort({ createdAt: -1 });
+    res.render('dashboard', { 
+      user: req.user,
+      orders: orders 
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).send('Error loading dashboard');
+  }
+});
+
+app.post('/dashboard/add-order', requireHighCommand, async (req, res) => {
+  try {
+    const { orderName, orderContent } = req.body;
+    
+    // Create new order
+    const newOrder = new Order({
+      name: orderName,
+      content: orderContent,
+      createdBy: req.user.username
+    });
+
+    // Save to database
+    await newOrder.save();
+    console.log('New order saved:', newOrder);
+    
+    res.redirect('/dashboard');
+  } catch (error) {
+    console.error('Error adding order:', error);
+    res.status(500).send('Error adding order');
+  }
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
