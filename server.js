@@ -50,7 +50,7 @@ app.get('/auth/discord/callback', passport.authenticate('discord', {
 });
 
 app.get('/login', (req, res) => {
-  res.render('login');
+  res.render('login', { user: req.user });
 });
 
 app.get('/logout', (req, res) => {

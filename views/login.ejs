@@ -7,9 +7,12 @@
 </head>
 <body>
     <h1>Login</h1>
-    <form action="/login" method="POST">
-        <input type="hidden" name="token" value="<%= token %>">
-        <button type="submit">Login with Discord</button>
-    </form>
+    <% if (!user) { %>
+        <a href="/auth/discord">Login with Discord</a>
+    <% } else { %>
+        <p>Welcome, <%= user.username %>!</p>
+        <a href="/dashboard">Go to Dashboard</a>
+        <a href="/logout">Logout</a>
+    <% } %>
 </body>
 </html>
