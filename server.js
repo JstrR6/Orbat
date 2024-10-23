@@ -22,17 +22,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session configuration
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'default_secret',
-    resave: true,  // Changed to true
-    saveUninitialized: true,  // Changed to true
-    cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    },
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI,
-        ttl: 24 * 60 * 60 // 1 day
-    })
+  secret: process.env.SESSION_SECRET || 'default_secret',
+  resave: false,  // Changed to false
+  saveUninitialized: false,  // Changed to false
+  cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  },
+  store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 24 * 60 * 60 // 1 day
+  })
 }));
 
 // Initialize passport after session middleware
@@ -69,6 +69,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+  console.log('Login route. Is authenticated:', req.isAuthenticated());
   if (req.isAuthenticated()) {
     res.redirect('/dashboard');
   } else {
@@ -77,8 +78,10 @@ app.get('/login', (req, res) => {
 });
 
 // Auth routes
-app.get('/auth/discord', passport.authenticate('discord'));
-app.get('/auth/discord/callback', passport.authenticate('discord'), (req, res) => res.redirect('/dashboard'));
+app.get('/auth/discord/callback', passport.authenticate('discord', {
+  successRedirect: '/dashboard',
+  failureRedirect: '/login'
+}));
 
 // Add this new loading route
 app.get('/loading', (req, res) => {

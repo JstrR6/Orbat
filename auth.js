@@ -56,35 +56,41 @@ const createOrUpdateUser = async (discordId, username, highestRole) => {
 };
 
 passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => {
+  console.log('Deserializing user:', user);
+  done(null, user);
+});
 
 passport.use(new DiscordStrategy({
-    clientID: process.env.DISCORD_CLIENT_ID,
-    clientSecret: process.env.DISCORD_CLIENT_SECRET,
-    callbackURL: process.env.DISCORD_CALLBACK_URL,
-    scope: ['identify', 'guilds']
+  clientID: process.env.DISCORD_CLIENT_ID,
+  clientSecret: process.env.DISCORD_CLIENT_SECRET,
+  callbackURL: process.env.DISCORD_CALLBACK_URL,
+  scope: ['identify', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
-    try {
-        // Get user's server info
-        const guild = profile.guilds.find(g => g.id === process.env.DISCORD_GUILD_ID);
-        
-        // Save user to database
-        let user = await User.findOne({ discordId: profile.id });
-        if (!user) {
-            user = new User({
-                discordId: profile.id,
-                username: profile.username,
-                roles: guild ? guild.roles : [],
-                highestRole: guild ? guild.roles[0] : null
-            });
-        }
-        await user.save();
-        
-        // Done - go to dashboard
-        return done(null, user);
-    } catch (error) {
-        return done(error, null);
+  try {
+    const guild = profile.guilds.find(g => g.id === process.env.DISCORD_GUILD_ID);
+    console.log('Guild fetched:', guild); // Add logging here
+
+    let user = await User.findOne({ discordId: profile.id });
+    if (!user) {
+      user = new User({
+        discordId: profile.id,
+        username: profile.username,
+        roles: guild ? guild.roles : [],
+        highestRole: guild ? guild.roles[0] : null
+      });
+    } else {
+      user.username = profile.username;
+      user.roles = guild ? guild.roles : [];
+      user.highestRole = guild ? guild.roles[0] : null;
     }
+
+    await user.save();
+    return done(null, user);
+  } catch (error) {
+    console.error('Error in Discord Strategy:', error);
+    return done(error, null);
+  }
 }));
 
 module.exports = { passport, ensureAuthenticated };
