@@ -1,6 +1,6 @@
 const express = require('express');
 const session = require('express-session');
-const passport = require('passport');
+const { passport } = require('./auth');
 const path = require('path');
 const routes = require('./routes');
 
@@ -25,7 +25,7 @@ app.use(session({
     }
 }));
 
-// Passport middleware
+// Initialize passport
 app.use(passport.initialize());
 app.use(passport.session());
 
