@@ -19,9 +19,9 @@ const client = new Client({
 
 // Configuration - Replace these with your values
 const config = {
-    clientID: 'YOUR_CLIENT_ID',
-    clientSecret: 'YOUR_CLIENT_SECRET',
-    botToken: 'YOUR_BOT_TOKEN',
+    clientID: 'CLIENT_ID',
+    clientSecret: 'CLIENT_SECRET',
+    botToken: 'BOT_TOKEN',
     callbackURL: 'https://usm-dashboard.onrender.com/auth/callback',
 };
 
