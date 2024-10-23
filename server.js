@@ -7,7 +7,6 @@ const Order = require('./models/Order');
 const path = require('path');
 const Training = require('./models/Training');
 const MongoStore = require('connect-mongo');
-const dotenv = require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
