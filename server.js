@@ -25,11 +25,13 @@ app.use(express.urlencoded({ extended: true }));
 // Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
+  resave: true,
+  saveUninitialized: true,
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    httpOnly: true,
+    sameSite: 'lax'
   }
 }));
 
@@ -40,6 +42,9 @@ app.use(passport.session());
 // Set view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Trust proxy
+app.set('trust proxy', 1);
 
 // Routes
 app.get('/', (req, res) => {
@@ -52,13 +57,14 @@ app.get('/', (req, res) => {
 
 // Auth routes
 app.get('/auth/discord', passport.authenticate('discord'));
-app.get('/auth/discord/callback', passport.authenticate('discord', {
-  failureRedirect: '/login'
-}), (req, res) => {
-  console.log('Authentication successful, user:', req.user);
-  console.log('Session:', req.session);
-  res.redirect('/dashboard');
-});
+app.get('/auth/discord/callback', 
+  passport.authenticate('discord', { failureRedirect: '/login' }),
+  (req, res) => {
+    console.log('Authentication successful, user:', req.user);
+    console.log('Session:', req.session);
+    res.redirect('/dashboard');
+  }
+);
 
 app.get('/login', (req, res) => {
   res.render('login', { user: req.user });
