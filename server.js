@@ -1,6 +1,6 @@
 const express = require('express');
 const session = require('express-session');
-const passport = require('passport');
+const { passport } = require('./auth');
 const mongoose = require('mongoose');
 const path = require('path');
 const auth = require('./auth');
@@ -21,6 +21,8 @@ mongoose.connect(process.env.MONGODB_URI, {
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -54,6 +56,7 @@ app.get('/auth/discord/callback', passport.authenticate('discord', {
   failureRedirect: '/login'
 }), (req, res) => {
   console.log('Authentication successful, user:', req.user);
+  console.log('Session:', req.session);
   res.redirect('/dashboard');
 });
 
