@@ -6,7 +6,8 @@ const User = require('./models/User');
 const Order = require('./models/Order');
 const path = require('path');
 const Training = require('./models/Training');
-const MongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo');
+const dotenv = require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,7 +27,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // Set to true in production
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     },
     store: MongoStore.create({
