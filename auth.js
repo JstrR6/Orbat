@@ -67,33 +67,31 @@ passport.use(new DiscordStrategy({
     clientID: process.env.DISCORD_CLIENT_ID,
     clientSecret: process.env.DISCORD_CLIENT_SECRET,
     callbackURL: process.env.DISCORD_CALLBACK_URL,
-    scope: ['identify', 'guilds.members.read']
+    scope: ['identify', 'guilds', 'guilds.members.read']  // Added 'guilds'
 },
 async (accessToken, refreshToken, profile, done) => {
     try {
-        // Get user's roles from the guild
-        const guild = profile.guilds.find(g => g.id === process.env.DISCORD_GUILD_ID);
+        console.log('Profile:', profile); // Debug log
         
-        if (!guild) {
-            return done(null, false);
-        }
-
         let user = await User.findOne({ discordId: profile.id });
         if (!user) {
             user = new User({
                 discordId: profile.id,
                 username: profile.username,
-                roles: guild.roles,
-                highestRole: Math.max(...guild.roles)
+                roles: profile.guilds ? profile.guilds[0].roles : [],
+                highestRole: profile.guilds ? Math.max(...profile.guilds[0].roles) : null
             });
             await user.save();
         } else {
-            user.roles = guild.roles;
-            user.highestRole = Math.max(...guild.roles);
-            await user.save();
+            if (profile.guilds) {
+                user.roles = profile.guilds[0].roles;
+                user.highestRole = Math.max(...profile.guilds[0].roles);
+                await user.save();
+            }
         }
         return done(null, user);
     } catch (error) {
+        console.error('Auth Error:', error); // Debug log
         return done(error, null);
     }
 }));
