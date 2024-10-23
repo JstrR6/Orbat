@@ -56,14 +56,17 @@ const createOrUpdateUser = async (discordId, username, highestRole) => {
 };
 
 passport.serializeUser((user, done) => {
+    console.log('Serializing user:', user.id);
     done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
     try {
+        console.log('Deserializing user:', id);
         const user = await User.findById(id);
         done(null, user);
     } catch (err) {
+        console.error('Deserialization error:', err);
         done(err, null);
     }
 });
@@ -76,37 +79,28 @@ passport.use(new DiscordStrategy({
 },
 async (accessToken, refreshToken, profile, done) => {
     try {
+        console.log('Discord profile:', profile);
+        
         let user = await User.findOne({ discordId: profile.id });
         
         if (user) {
-            // Update existing user
-            user = await User.findOneAndUpdate(
-                { discordId: profile.id },
-                {
-                    username: profile.username,
-                    discriminator: profile.discriminator,
-                    avatar: profile.avatar,
-                    // Update other fields as needed
-                },
-                { new: true }
-            );
-        } else {
-            // Create new user
-            user = await User.create({
-                discordId: profile.id,
-                username: profile.username,
-                discriminator: profile.discriminator,
-                avatar: profile.avatar,
-                // Add other initial fields
-            });
+            console.log('Existing user found:', user);
+            return done(null, user);
         }
-
-        // Log successful user processing
-        console.log('Processed user:', user);
         
+        // Create new user if doesn't exist
+        user = await User.create({
+            discordId: profile.id,
+            username: profile.username,
+            discriminator: profile.discriminator,
+            avatar: profile.avatar,
+            roles: [] // Initialize with empty roles array
+        });
+        
+        console.log('New user created:', user);
         return done(null, user);
     } catch (err) {
-        console.error('Auth Error:', err);
+        console.error('Authentication error:', err);
         return done(err, null);
     }
 }));

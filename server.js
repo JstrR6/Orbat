@@ -22,9 +22,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session configuration
 app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'default_secret',
+    resave: true,  // Changed to true
+    saveUninitialized: true,  // Changed to true
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -84,12 +84,20 @@ app.get('/auth/discord', passport.authenticate('discord', {
 app.get('/auth/discord/callback', 
     passport.authenticate('discord', { 
         failureRedirect: '/login',
-        keepSessionInfo: true  // Add this to preserve session
+        keepSessionInfo: true
     }), 
     (req, res) => {
-        // Log successful authentication
-        console.log('User authenticated:', req.user);
-        res.redirect('/dashboard');
+        // Add debug logging
+        console.log('Authentication successful');
+        console.log('Session:', req.session);
+        console.log('User:', req.user);
+        
+        if (req.session.passport && req.session.passport.user) {
+            res.redirect('/dashboard');
+        } else {
+            console.log('No user in session after authentication');
+            res.redirect('/login');
+        }
     }
 );
 
