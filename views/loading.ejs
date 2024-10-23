@@ -16,21 +16,19 @@
     </div>
 
     <script>
-        // Check status every second
-        const checkStatus = async () => {
-            try {
-                const response = await fetch('/auth/status');
-                const data = await response.json();
-                
-                if (data.ready) {
-                    window.location.href = '/dashboard';
-                }
-            } catch (error) {
-                console.error('Error checking status:', error);
-            }
-        };
+        function checkStatus() {
+            fetch('/auth/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ready) {
+                        window.location.href = '/dashboard';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
 
-        // Start checking status
+        // Check immediately and then every second
+        checkStatus();
         setInterval(checkStatus, 1000);
     </script>
 </body>
