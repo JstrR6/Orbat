@@ -55,31 +55,78 @@ async function getBotGuilds() {
     }
 }
 
-// Get mutual guilds helper function
-function getMutualGuilds(userGuilds, botGuilds) {
-    console.log('User Guilds:', userGuilds.length);
-    console.log('Bot Guilds:', botGuilds.length);
-    
-    const mutual = userGuilds.filter(userGuild => 
-        botGuilds.some(botGuild => botGuild.id === userGuild.id)
-    );
-    
-    console.log('Mutual Guilds:', mutual.length);
-    return mutual;
-}
-
 // Get guild member helper function
 async function getGuildMember(guildId, userId) {
     try {
-        const guild = botClient.guilds.cache.get(guildId);
-        if (!guild) return null;
-        
+        // Force fetch the guild first
+        const guild = await botClient.guilds.fetch(guildId);
+        if (!guild) {
+            console.log(`Guild ${guildId} not found`);
+            return null;
+        }
+
+        // Force fetch the member
         const member = await guild.members.fetch(userId);
-        return member;
+        if (!member) {
+            console.log(`Member ${userId} not found in guild ${guildId}`);
+            return null;
+        }
+
+        // Get all roles for the member
+        const roles = member.roles.cache.map(role => ({
+            id: role.id,
+            name: role.name,
+            color: role.hexColor,
+            position: role.position,
+            permissions: role.permissions.toArray()
+        }));
+
+        console.log(`Found ${roles.length} roles for member ${userId} in guild ${guildId}`);
+
+        return {
+            roles,
+            joinedAt: member.joinedAt,
+            nickname: member.nickname,
+            highestRole: {
+                id: member.roles.highest.id,
+                name: member.roles.highest.name,
+                color: member.roles.highest.hexColor,
+                position: member.roles.highest.position,
+                permissions: member.roles.highest.permissions.toArray()
+            },
+            permissions: member.permissions.toArray()
+        };
     } catch (error) {
-        console.error(`Error fetching member info for guild ${guildId}:`, error);
+        console.error(`Error fetching member info for guild ${guildId}, user ${userId}:`, error);
         return null;
     }
+}
+
+// Get mutual guilds helper function with role information
+async function getMutualGuildsWithRoles(userGuilds, botGuilds, userId) {
+    console.log('Getting mutual guilds with roles...');
+    console.log('User Guilds:', userGuilds.length);
+    console.log('Bot Guilds:', botGuilds.length);
+    
+    const mutualGuilds = userGuilds.filter(userGuild => 
+        botGuilds.some(botGuild => botGuild.id === userGuild.id)
+    );
+    
+    console.log('Found mutual guilds:', mutualGuilds.length);
+
+    // Enrich mutual guilds with member information
+    const enrichedGuilds = await Promise.all(
+        mutualGuilds.map(async guild => {
+            const memberInfo = await getGuildMember(guild.id, userId);
+            return {
+                ...guild,
+                memberInfo
+            };
+        })
+    );
+
+    console.log('Enriched guilds with member info');
+    return enrichedGuilds;
 }
 
 // Setup Discord Strategy
@@ -97,49 +144,24 @@ passport.use(new DiscordStrategy({
         const botGuilds = await getBotGuilds();
         console.log('Bot guilds fetched:', botGuilds.length);
         
-        // Get mutual guilds
-        console.log('Fetching mutual guilds...');
-        const mutualGuilds = getMutualGuilds(profile.guilds || [], botGuilds);
-        console.log('Mutual guilds found:', mutualGuilds.length);
-        
-        // Enrich guild information
-        const enrichedGuilds = await Promise.all(
-            mutualGuilds.map(async guild => {
-                const member = await getGuildMember(guild.id, profile.id);
-                return {
-                    ...guild,
-                    member: member ? {
-                        roles: member.roles.cache.map(role => ({
-                            id: role.id,
-                            name: role.name,
-                            color: role.color,
-                            position: role.position
-                        })),
-                        joinedAt: member.joinedAt,
-                        nickname: member.nickname,
-                        highestRole: {
-                            id: member.roles.highest.id,
-                            name: member.roles.highest.name,
-                            color: member.roles.highest.color,
-                            position: member.roles.highest.position
-                        }
-                    } : null
-                };
-            })
-        );
+        // Get mutual guilds with roles
+        console.log('Fetching mutual guilds with roles...');
+        const mutualGuilds = await getMutualGuildsWithRoles(profile.guilds || [], botGuilds, profile.id);
+        console.log('Mutual guilds processed:', mutualGuilds.length);
 
         // Create enriched user profile
         const userProfile = {
             id: profile.id,
             username: profile.username,
             discriminator: profile.discriminator,
-            avatar: `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`,
+            avatar: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null,
             email: profile.email,
-            guilds: enrichedGuilds,
+            guilds: mutualGuilds,
             accessToken,
             refreshToken
         };
 
+        console.log('User profile created with guild information');
         return done(null, userProfile);
     } catch (error) {
         console.error('Error in Discord strategy:', error);
