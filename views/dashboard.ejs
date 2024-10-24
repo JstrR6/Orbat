@@ -10,7 +10,7 @@
     <%
     // Helper function to format Discord color codes
     function formatColor(color) {
-        if (!color || color === 0) return '#000000'; // Default black if no color
+        if (!color || color === 0) return '#000000';
         if (typeof color === 'string' && color.startsWith('#')) return color;
         const hex = typeof color === 'number' ? color.toString(16) : color;
         return `#${hex.padStart(6, '0')}`;
@@ -20,9 +20,9 @@
     <div class="container">
         <div class="sidebar">
             <h2>USM Dashboard</h2>
-            <a href="/dashboard" class="button">Dashboard</a>
-            <a href="/forms" class="button">Forms</a>
-            <a href="/orders" class="button">Orders</a>
+            <a href="#" class="button">Dashboard</a>
+            <a href="#" class="button">Forms</a>
+            <a href="#" class="button">Orders</a>
         </div>
         <div class="main-content">
             <div class="top-bar">
@@ -36,9 +36,9 @@
 
             <div class="announcement-form">
                 <h2>Create Announcement</h2>
-                <form id="announcementForm" action="/post-announcement" method="POST">
-                    <input type="text" id="announcementTitle" name="title" placeholder="Announcement Title" required>
-                    <textarea id="announcementContent" name="content" placeholder="Announcement Content" required></textarea>
+                <form id="announcementForm">
+                    <input type="text" id="announcementTitle" placeholder="Announcement Title" required>
+                    <textarea id="announcementContent" placeholder="Announcement Content" required></textarea>
                     <button type="submit">Post Announcement</button>
                 </form>
             </div>
@@ -46,13 +46,7 @@
             <div class="announcements">
                 <h2>Announcements</h2>
                 <div id="announcementsList">
-                    <% announcements.forEach(function(announcement) { %>
-                        <div class="announcement">
-                            <h3><%= announcement.title %></h3>
-                            <p><%= announcement.content %></p>
-                            <small>Posted by <%= announcement.author %> on <%= announcement.date %></small>
-                        </div>
-                    <% }); %>
+                    <!-- Announcements will be dynamically inserted here -->
                 </div>
             </div>
 
@@ -65,16 +59,17 @@
                             <h4>Your Roles:</h4>
                             <ul>
                                 <% guild.memberInfo.roles.forEach(function(role) { %>
-                                    <li style="color: <%= formatColor(role.color) || '#000000' %>">
+                                    <li>
                                         <%= role.name %> (Position: <%= role.position %>)
                                     </li>
                                 <% }); %>
                             </ul>
-                            <p>Highest Role: <%= guild.memberInfo.highestRole.name %></p>
-                            <p style="color: <%= formatColor(guild.memberInfo.highestRole.color) || '#000000' %>">
-                                Highest Role Color Example
-                            </p>
-                            
+                            <% 
+                            const highestRole = guild.memberInfo.roles.reduce((highest, role) => 
+                                role.position > highest.position ? role : highest
+                            );
+                            %>
+                            <p>Highest Role: <%= highestRole.name %> (Position: <%= highestRole.position %>)</p>
                         <% } else { %>
                             <p>No role information available</p>
                         <% } %>
