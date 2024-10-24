@@ -34,26 +34,38 @@ async function getBotGuilds() {
     try {
         // Wait for bot client to be ready
         if (!botClient.isReady()) {
+            console.log('Waiting for bot client to be ready...');
             await new Promise(resolve => {
                 botClient.once('ready', resolve);
             });
         }
-        return botClient.guilds.cache.map(guild => ({
+
+        // Force fetch all guilds
+        const guilds = await botClient.guilds.fetch();
+        console.log(`Bot is in ${guilds.size} guilds`);
+
+        return Array.from(guilds.values()).map(guild => ({
             id: guild.id,
             name: guild.name,
             icon: guild.icon
         }));
     } catch (error) {
         console.error('Error fetching bot guilds:', error);
-        return [];
+        throw new Error('Error fetching bot guilds: ' + error.message);
     }
 }
 
 // Get mutual guilds helper function
 function getMutualGuilds(userGuilds, botGuilds) {
-    return userGuilds.filter(guild => 
-        botGuilds.some(botGuild => botGuild.id === guild.id)
+    console.log('User Guilds:', userGuilds.length);
+    console.log('Bot Guilds:', botGuilds.length);
+    
+    const mutual = userGuilds.filter(userGuild => 
+        botGuilds.some(botGuild => botGuild.id === userGuild.id)
     );
+    
+    console.log('Mutual Guilds:', mutual.length);
+    return mutual;
 }
 
 // Get guild member helper function
@@ -78,11 +90,17 @@ passport.use(new DiscordStrategy({
     scope: DISCORD_SCOPES
 }, async (accessToken, refreshToken, profile, done) => {
     try {
+        console.log('Processing Discord login for:', profile.username);
+        
         // Fetch bot guilds
+        console.log('Fetching bot guilds...');
         const botGuilds = await getBotGuilds();
+        console.log('Bot guilds fetched:', botGuilds.length);
         
         // Get mutual guilds
-        const mutualGuilds = getMutualGuilds(profile.guilds, botGuilds);
+        console.log('Fetching mutual guilds...');
+        const mutualGuilds = getMutualGuilds(profile.guilds || [], botGuilds);
+        console.log('Mutual guilds found:', mutualGuilds.length);
         
         // Enrich guild information
         const enrichedGuilds = await Promise.all(
