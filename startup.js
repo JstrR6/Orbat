@@ -1,5 +1,8 @@
 const { spawn } = require('child_process');
 const path = require('path');
+require('./botClient');  // Initialize bot client first
+require('./server');     // Start web server
+require('./bot');        // Start bot command handling
 
 // Function to start a process
 function startProcess(command, args, name) {

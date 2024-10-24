@@ -1,16 +1,9 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const config = require('./config');
-
-// Discord bot setup
-const client = new Client({
-    intents: config.bot.intents.map(intent => GatewayIntentBits[intent])
-});
-
-// Make bot client available globally for auth.js
-global.botClient = client;
+const botClient = require('./botClient');
 
 // Bot commands
-client.on('messageCreate', async message => {
+botClient.on('messageCreate', async message => {
     if (message.content.toLowerCase() === `${config.bot.prefix}login`) {
         try {
             // Create login URL
@@ -37,34 +30,15 @@ client.on('messageCreate', async message => {
     }
 });
 
-// Bot ready event
-client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-    client.user.setActivity(config.bot.activity.name, { type: config.bot.activity.type });
-});
-
 // Error handling
-client.on('error', error => {
+botClient.on('error', error => {
     console.error('Discord client error:', error);
 });
-
-// Validate bot token before login
-if (!config.discord.botToken) {
-    console.error('Bot token is missing!');
-    process.exit(1);
-}
-
-// Bot login
-client.login(config.discord.botToken)
-    .catch(error => {
-        console.error('Failed to login:', error);
-        process.exit(1);
-    });
 
 // Handle process termination
 process.on('SIGINT', () => {
     console.log('Bot shutting down...');
-    client.destroy();
+    botClient.destroy();
     process.exit(0);
 });
 
