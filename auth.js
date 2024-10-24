@@ -178,10 +178,19 @@ passport.use(new DiscordStrategy({
 }));
 
 const isAuthenticated = (req, res, next) => {
-    console.log('Checking authentication:', req.isAuthenticated());
+    console.log('Checking authentication');
     if (req.isAuthenticated()) {
+        console.log('User is authenticated via session');
         return next();
     }
+
+    // Check if the user has any mutual guilds with the bot
+    if (req.user && req.user.guilds && req.user.guilds.length > 0) {
+        console.log('User has mutual guilds with the bot');
+        return next();
+    }
+
+    console.log('User is not authenticated and has no mutual guilds');
     res.redirect('/login');
 };
 
