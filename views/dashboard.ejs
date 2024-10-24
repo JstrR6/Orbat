@@ -3,27 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="/css/dashboard.css">
+    <title>USM Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .announcements {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .announcement-form {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .announcement-form input,
+        .announcement-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .announcement-form button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .announcement-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .announcement-item:last-child {
+            border-bottom: none;
+        }
+        .announcement-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .announcement-actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .edit-btn {
+            background-color: #f39c12;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
 </head>
 <body>
-    <nav>
-        <div class="nav-content">
-            <h1>Dashboard</h1>
-            <div class="user-info">
-                <img src="<%= user.avatar %>" alt="Avatar">
-                <span><%= user.username %></span>
-                <a href="/logout" class="logout-btn">Logout</a>
+    <div class="container">
+        <div class="sidebar">
+            <h2>USM Dashboard</h2>
+            <a href="#" class="button">Dashboard</a>
+            <a href="#" class="button">Forms</a>
+            <a href="#" class="button">Orders</a>
+        </div>
+        <div class="main-content">
+            <div class="top-bar">
+                <h1>Welcome, <%= user.username %>!</h1>
+                <div class="user-info">
+                    <span><%= user.username %></span>
+                    <img src="<%= user.avatar %>" alt="Avatar" class="user-avatar">
+                    <a href="/logout" class="logout-btn">Logout</a>
+                </div>
+            </div>
+
+            <div class="announcement-form">
+                <h2>Create Announcement</h2>
+                <form id="announcementForm">
+                    <input type="text" id="announcementTitle" placeholder="Announcement Title" required>
+                    <textarea id="announcementContent" placeholder="Announcement Content" required></textarea>
+                    <button type="submit">Post Announcement</button>
+                </form>
+            </div>
+
+            <div class="announcements">
+                <h2>Announcements</h2>
+                <div id="announcementsList">
+                    <!-- Announcements will be dynamically inserted here -->
+                </div>
             </div>
         </div>
-    </nav>
-    
-    <main>
-        <div class="dashboard-container">
-            <h2>Welcome, <%= user.username %>!</h2>
-            <!-- Add your dashboard content here -->
-        </div>
-    </main>
+    </div>
+
     <script src="/js/dashboard.js"></script>
 </body>
 </html>

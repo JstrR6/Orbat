@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const { isAuthenticated, hasGuildPermission } = require('./auth');
 const { getUserInfo, getUsersByGuild } = require('./mongo');
+const Announcement = require('./models/Announcement');
 
 // Public routes
 router.get('/', (req, res) => {
@@ -69,6 +70,48 @@ router.get('/api/guild/:guildId/users', isAuthenticated, async (req, res) => {
         res.json(users);
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Add these routes to handle announcements
+router.get('/api/announcements', async (req, res) => {
+    try {
+        const announcements = await Announcement.find().sort({ date: -1 });
+        res.json(announcements);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to load announcements' });
+    }
+});
+
+router.post('/api/announcements', async (req, res) => {
+    try {
+        const announcement = new Announcement(req.body);
+        await announcement.save();
+        res.status(201).json(announcement);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create announcement' });
+    }
+});
+
+router.put('/api/announcements/:id', async (req, res) => {
+    try {
+        const announcement = await Announcement.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        res.json(announcement);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update announcement' });
+    }
+});
+
+router.delete('/api/announcements/:id', async (req, res) => {
+    try {
+        await Announcement.findByIdAndDelete(req.params.id);
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete announcement' });
     }
 });
 

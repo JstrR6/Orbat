@@ -3,20 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="/css/login.css">
+    <title>USM Dashboard Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            overflow: hidden;
+        }
+        
+        .background {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            right: -50%;
+            bottom: -50%;
+            width: 200%;
+            height: 200%;
+            background: transparent url('http://assets.iceable.com/img/noise-transparent.png') repeat 0 0;
+            background-repeat: repeat;
+            animation: bg-animation .2s infinite;
+            opacity: .9;
+            visibility: visible;
+            z-index: -1;
+        }
+        
+        @keyframes bg-animation {
+            0% { transform: translate(0,0) }
+            10% { transform: translate(-5%,-5%) }
+            20% { transform: translate(-10%,5%) }
+            30% { transform: translate(5%,-10%) }
+            40% { transform: translate(-5%,15%) }
+            50% { transform: translate(-10%,5%) }
+            60% { transform: translate(15%,0) }
+            70% { transform: translate(0,10%) }
+            80% { transform: translate(-15%,0) }
+            90% { transform: translate(10%,5%) }
+            100% { transform: translate(5%,0) }
+        }
+        
+        .login-container {
+            background-color: rgba(66, 92, 255, 0.15);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background-color: #ddd;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #3498db;
+        }
+        
+        h1 {
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .discord-btn {
+            background-color: #7289da;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+        
+        .discord-btn img {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .discord-btn:hover {
+            background-color: #5c6fb1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .discord-btn:active {
+            transform: scale(0.98) translateY(0);
+        }
+    </style>
 </head>
 <body>
+    <div class="background"></div>
     <div class="login-container">
-        <h1>Welcome</h1>
-        <div class="login-box">
-            <h2>Login with Discord</h2>
-            <button onclick="window.location.href='/auth/discord'" class="discord-btn">
-                <img src="/images/discord-logo.png" alt="Discord">
-                Login with Discord
-            </button>
+        <div class="logo">
+            USM
         </div>
+        <h1>USM Dashboard</h1>
+        <button class="discord-btn" onclick="window.location.href='/auth/discord'">
+            <img src="/images/discord-logo.png" alt="Discord">
+            Login with Discord
+        </button>
     </div>
-    <script src="/js/login.js"></script>
+
+    <script>
+        // Reactive background effect
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            document.body.style.background = `linear-gradient(135deg, 
+                hsl(204, 70%, ${40 + y * 20}%), 
+                hsl(210, 70%, ${35 + x * 20}%)
+            )`;
+        });
+    </script>
 </body>
 </html>
