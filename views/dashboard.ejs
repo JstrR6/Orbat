@@ -7,6 +7,16 @@
     <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
+    <%
+    // Helper function to format Discord color codes
+    function formatColor(color) {
+        if (!color || color === 0) return '#000000';
+        if (typeof color === 'string' && color.startsWith('#')) return color;
+        const hex = typeof color === 'number' ? color.toString(16) : color;
+        return `#${hex.padStart(6, '0')}`;
+    }
+    %>
+
     <div class="container">
         <div class="sidebar">
             <h2>USM Dashboard</h2>
@@ -49,13 +59,13 @@
                             <h4>Your Roles:</h4>
                             <ul>
                                 <% guild.memberInfo.roles.forEach(function(role) { %>
-                                    <li style="color: '<%= formatColor(role.color) %>'">
+                                    <li style="color: <%= formatColor(role.color) %>">
                                         <%= role.name %> (Position: <%= role.position %>)
                                     </li>
                                 <% }); %>
                             </ul>
                             <p>Highest Role: <%= guild.memberInfo.highestRole.name %></p>
-                            <p style="color: '<%= formatColor(guild.memberInfo.highestRole.color) %>'">
+                            <p style="color: <%= formatColor(guild.memberInfo.highestRole.color) %>">
                                 Highest Role Color Example
                             </p>
                         <% } else { %>
