@@ -3,7 +3,6 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const config = require('./config');
 const botClient = require('./botClient');
 
-// Validate config before setting up passport
 console.log('Auth Configuration Check:');
 console.log('Client ID:', config.discord.clientID);
 console.log('Callback URL:', config.discord.callbackURL);
@@ -12,24 +11,44 @@ if (!config.discord.clientID || !config.discord.clientSecret || !config.discord.
     throw new Error('Missing required Discord configuration');
 }
 
-// Define the scopes we need
-const DISCORD_SCOPES = [
-    'identify',          // username, discriminator, avatar
-    'email',            // email address
-    'guilds',           // servers they're in
-    'guilds.members.read' // roles in servers
-];
+const DISCORD_SCOPES = ['identify', 'email', 'guilds', 'guilds.members.read'];
 
-// Initialize passport
 passport.serializeUser((user, done) => {
-    done(null, user);
+    console.log('Serializing user:', user.id);
+    done(null, user.id);
 });
 
-passport.deserializeUser((user, done) => {
-    done(null, user);
+passport.deserializeUser(async (id, done) => {
+    console.log('Deserializing user:', id);
+    try {
+        // Fetch user data from your database or storage
+        const user = await getUserById(id);
+        if (!user) {
+            console.log('User not found during deserialization:', id);
+            return done(null, false);
+        }
+        console.log('User deserialized successfully:', id);
+        done(null, user);
+    } catch (error) {
+        console.error('Error deserializing user:', error);
+        done(error, null);
+    }
 });
 
-// Get bot guilds helper function
+async function getUserById(id) {
+    // This is a placeholder. Replace with actual database query
+    console.log('Fetching user by ID:', id);
+    
+    // Simulating database fetch
+    const user = {
+        id: id,
+        username: 'User_' + id,
+        // Add other user properties as needed
+    };
+
+    return user;
+}
+
 async function getBotGuilds() {
     try {
         // Wait for bot client to be ready
@@ -55,7 +74,6 @@ async function getBotGuilds() {
     }
 }
 
-// Get guild member helper function
 async function getGuildMember(guildId, userId) {
     try {
         // Force fetch the guild first
@@ -102,7 +120,6 @@ async function getGuildMember(guildId, userId) {
     }
 }
 
-// Get mutual guilds helper function with role information
 async function getMutualGuildsWithRoles(userGuilds, botGuilds, userId) {
     console.log('Getting mutual guilds with roles...');
     console.log('User Guilds:', userGuilds.length);
@@ -129,7 +146,6 @@ async function getMutualGuildsWithRoles(userGuilds, botGuilds, userId) {
     return enrichedGuilds;
 }
 
-// Setup Discord Strategy
 passport.use(new DiscordStrategy({
     clientID: config.discord.clientID,
     clientSecret: config.discord.clientSecret,
@@ -139,17 +155,9 @@ passport.use(new DiscordStrategy({
     try {
         console.log('Processing Discord login for:', profile.username);
         
-        // Fetch bot guilds
-        console.log('Fetching bot guilds...');
         const botGuilds = await getBotGuilds();
-        console.log('Bot guilds fetched:', botGuilds.length);
-        
-        // Get mutual guilds with roles
-        console.log('Fetching mutual guilds with roles...');
         const mutualGuilds = await getMutualGuildsWithRoles(profile.guilds || [], botGuilds, profile.id);
-        console.log('Mutual guilds processed:', mutualGuilds.length);
 
-        // Create enriched user profile
         const userProfile = {
             id: profile.id,
             username: profile.username,
@@ -161,7 +169,7 @@ passport.use(new DiscordStrategy({
             refreshToken
         };
 
-        console.log('User profile created with guild information');
+        console.log('User profile created:', userProfile.id);
         return done(null, userProfile);
     } catch (error) {
         console.error('Error in Discord strategy:', error);
@@ -169,23 +177,24 @@ passport.use(new DiscordStrategy({
     }
 }));
 
-// Middleware to check authentication
 const isAuthenticated = (req, res, next) => {
+    console.log('Checking authentication:', req.isAuthenticated());
     if (req.isAuthenticated()) {
         return next();
     }
     res.redirect('/login');
 };
 
-// Middleware to check specific permissions
 const hasGuildPermission = (guildId, requiredRole) => {
     return (req, res, next) => {
         if (!req.isAuthenticated()) {
+            console.log('User not authenticated, redirecting to login');
             return res.redirect('/login');
         }
 
         const guild = req.user.guilds.find(g => g.id === guildId);
         if (!guild || !guild.memberInfo) {
+            console.log('No access to server:', guildId);
             return res.status(403).send('No access to this server');
         }
 
@@ -194,6 +203,7 @@ const hasGuildPermission = (guildId, requiredRole) => {
         );
 
         if (!hasRole) {
+            console.log('Insufficient permissions for user:', req.user.id);
             return res.status(403).send('Insufficient permissions');
         }
 
