@@ -11,6 +11,7 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.DirectMessages,
+        // Add any other intents you need
     ]
 });
 
@@ -55,8 +56,18 @@ client.login(config.discord.botToken)
         process.exit(1);
     });
 
+if (!process.env.MONGODB_URI) {
+    console.error('MONGODB_URI is not set in the environment variables');
+    process.exit(1);
+}
+
+if (!process.env.DISCORD_BOT_TOKEN) {
+    console.error('DISCORD_BOT_TOKEN is not set in the environment variables');
+    process.exit(1);
+}
+
 async function syncServerMembers() {
-    const client = new MongoClient(process.env.MONGODB_URI);
+    const client = new MongoClient(MONGODB_URI);
     try {
         await client.connect();
         const db = client.db('your_database_name');
@@ -69,7 +80,13 @@ async function syncServerMembers() {
         const guilds = await client.guilds.fetch();
 
         for (const [guildId, guild] of guilds) {
-            const members = await guild.members.fetch();
+            let members;
+            try {
+                members = await guild.members.fetch();
+            } catch (error) {
+                console.error(`Failed to fetch members for guild ${guild.name}: ${error.message}`);
+                continue; // Skip to the next guild
+            }
             for (const [memberId, member] of members) {
                 await collection.updateOne(
                     { userId: memberId },
