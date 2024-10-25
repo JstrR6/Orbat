@@ -115,4 +115,13 @@ router.delete('/api/announcements/:id', async (req, res) => {
     }
 });
 
+// Add this route to check the current session state
+router.get('/session-check', (req, res) => {
+    res.json({
+        sessionID: req.sessionID,
+        isAuthenticated: req.isAuthenticated(),
+        user: req.user
+    });
+});
+
 module.exports = router;

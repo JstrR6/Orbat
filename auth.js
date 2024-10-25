@@ -20,6 +20,8 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((user, done) => {
     console.log('Deserializing user:', user.id);
+    // Here we're passing the entire user object back
+    // In a production environment, you might want to fetch fresh data from a database
     done(null, user);
 });
 
@@ -170,7 +172,8 @@ passport.use(new DiscordStrategy({
 
 const isAuthenticated = (req, res, next) => {
     console.log('Checking authentication');
-    console.log('Session:', req.session);
+    console.log('Session ID:', req.sessionID);
+    console.log('Is Authenticated:', req.isAuthenticated());
     console.log('User:', req.user);
     
     if (req.isAuthenticated()) {
