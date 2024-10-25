@@ -15,24 +15,12 @@ const DISCORD_SCOPES = ['identify', 'email', 'guilds', 'guilds.members.read'];
 
 passport.serializeUser((user, done) => {
     console.log('Serializing user:', user.id);
-    done(null, user.id);
+    done(null, user);
 });
 
-passport.deserializeUser(async (id, done) => {
-    console.log('Deserializing user:', id);
-    try {
-        // Fetch user data from your database or storage
-        const user = await getUserById(id);
-        if (!user) {
-            console.log('User not found during deserialization:', id);
-            return done(null, false);
-        }
-        console.log('User deserialized successfully:', id);
-        done(null, user);
-    } catch (error) {
-        console.error('Error deserializing user:', error);
-        done(error, null);
-    }
+passport.deserializeUser((user, done) => {
+    console.log('Deserializing user:', user.id);
+    done(null, user);
 });
 
 async function getUserById(id) {
@@ -158,6 +146,8 @@ passport.use(new DiscordStrategy({
         const botGuilds = await getBotGuilds();
         const mutualGuilds = await getMutualGuildsWithRoles(profile.guilds || [], botGuilds, profile.id);
 
+        console.log('Mutual guilds:', mutualGuilds.length);
+
         const userProfile = {
             id: profile.id,
             username: profile.username,
@@ -170,6 +160,7 @@ passport.use(new DiscordStrategy({
         };
 
         console.log('User profile created:', userProfile.id);
+        console.log('Guilds in profile:', userProfile.guilds.length);
         return done(null, userProfile);
     } catch (error) {
         console.error('Error in Discord strategy:', error);
@@ -179,14 +170,16 @@ passport.use(new DiscordStrategy({
 
 const isAuthenticated = (req, res, next) => {
     console.log('Checking authentication');
+    console.log('Session:', req.session);
+    console.log('User:', req.user);
+    
     if (req.isAuthenticated()) {
         console.log('User is authenticated via session');
         return next();
     }
 
-    // Check if the user has any mutual guilds with the bot
     if (req.user && req.user.guilds && req.user.guilds.length > 0) {
-        console.log('User has mutual guilds with the bot');
+        console.log('User has mutual guilds:', req.user.guilds.length);
         return next();
     }
 
