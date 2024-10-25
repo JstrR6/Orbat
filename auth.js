@@ -2,6 +2,7 @@ const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const config = require('./config');
 const botClient = require('./botClient');
+const { MongoClient } = require('mongodb');
 
 console.log('Auth Configuration Check:');
 console.log('Client ID:', config.discord.clientID);
@@ -14,15 +15,28 @@ if (!config.discord.clientID || !config.discord.clientSecret || !config.discord.
 const DISCORD_SCOPES = ['identify', 'email', 'guilds', 'guilds.members.read'];
 
 passport.serializeUser((user, done) => {
-    console.log('Serializing user:', user.id);
-    done(null, user);
+    done(null, user.userId);
 });
 
-passport.deserializeUser((user, done) => {
-    console.log('Deserializing user:', user.id);
-    // Here we're passing the entire user object back
-    // In a production environment, you might want to fetch fresh data from a database
-    done(null, user);
+passport.deserializeUser(async (userId, done) => {
+    const client = new MongoClient(process.env.MONGODB_URI);
+    try {
+        await client.connect();
+        const db = client.db('your_database_name');
+        const collection = db.collection('server_members');
+
+        const user = await collection.findOne({ userId: userId });
+
+        if (user) {
+            done(null, user);
+        } else {
+            done(new Error('User not found'));
+        }
+    } catch (error) {
+        done(error);
+    } finally {
+        await client.close();
+    }
 });
 
 async function getUserById(id) {
@@ -140,53 +154,35 @@ passport.use(new DiscordStrategy({
     clientID: config.discord.clientID,
     clientSecret: config.discord.clientSecret,
     callbackURL: config.discord.callbackURL,
-    scope: DISCORD_SCOPES
+    scope: ['identify']
 }, async (accessToken, refreshToken, profile, done) => {
+    const client = new MongoClient(process.env.MONGODB_URI);
     try {
-        console.log('Processing Discord login for:', profile.username);
-        
-        const botGuilds = await getBotGuilds();
-        const mutualGuilds = await getMutualGuildsWithRoles(profile.guilds || [], botGuilds, profile.id);
+        await client.connect();
+        const db = client.db('your_database_name');
+        const collection = db.collection('server_members');
 
-        console.log('Mutual guilds:', mutualGuilds.length);
+        const user = await collection.findOne({ userId: profile.id });
 
-        const userProfile = {
-            id: profile.id,
-            username: profile.username,
-            discriminator: profile.discriminator,
-            avatar: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null,
-            email: profile.email,
-            guilds: mutualGuilds,
-            accessToken,
-            refreshToken
-        };
-
-        console.log('User profile created:', userProfile.id);
-        console.log('Guilds in profile:', userProfile.guilds.length);
-        return done(null, userProfile);
+        if (user) {
+            console.log('User found in database:', user);
+            return done(null, user);
+        } else {
+            console.log('User not found in database');
+            return done(null, false, { message: 'You must be in a server with the bot to use this application.' });
+        }
     } catch (error) {
-        console.error('Error in Discord strategy:', error);
-        return done(error, null);
+        console.error('Error during authentication:', error);
+        return done(error);
+    } finally {
+        await client.close();
     }
 }));
 
 const isAuthenticated = (req, res, next) => {
-    console.log('Checking authentication');
-    console.log('Session ID:', req.sessionID);
-    console.log('Is Authenticated:', req.isAuthenticated());
-    console.log('User:', req.user);
-    
     if (req.isAuthenticated()) {
-        console.log('User is authenticated via session');
         return next();
     }
-
-    if (req.user && req.user.guilds && req.user.guilds.length > 0) {
-        console.log('User has mutual guilds:', req.user.guilds.length);
-        return next();
-    }
-
-    console.log('User is not authenticated and has no mutual guilds');
     res.redirect('/login');
 };
 
