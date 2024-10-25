@@ -16,29 +16,9 @@ const client = new Client({
 });
 
 // Add ready event handler with guild caching
-client.once('ready', async () => {
-    console.log(`Bot logged in as ${client.user.tag}`);
-    
-    // Force fetch all guilds and their members
-    try {
-        const guilds = await client.guilds.fetch();
-        console.log(`Cached ${guilds.size} guilds`);
-        
-        // Cache members for each guild
-        for (const [id, guild] of guilds) {
-            try {
-                const members = await guild.members.fetch();
-                console.log(`Cached ${members.size} members for guild ${guild.name}`);
-            } catch (error) {
-                console.error(`Failed to cache members for guild ${guild.name}:`, error);
-            }
-        }
-    } catch (error) {
-        console.error('Failed to cache guilds:', error);
-    }
-
-    // Call this function when the bot starts up
-    syncServerMembers();
+client.once('ready', () => {
+    console.log(`Logged in as ${client.user.tag}!`);
+    setTimeout(syncServerMembers, 5000); // Wait 5 seconds before syncing
 });
 
 // Add debug logging
@@ -67,46 +47,25 @@ if (!process.env.DISCORD_BOT_TOKEN) {
 }
 
 async function syncServerMembers() {
-    const client = new MongoClient(MONGODB_URI);
     try {
-        await client.connect();
-        const db = client.db('your_database_name');
-        const collection = db.collection('server_members');
-
-        // Clear existing members
-        await collection.deleteMany({});
-
-        // Fetch all guilds the bot is in
         const guilds = await client.guilds.fetch();
-
+        console.log(`Bot is in ${guilds.size} guilds`);
         for (const [guildId, guild] of guilds) {
-            let members;
             try {
-                members = await guild.members.fetch();
+                const fullGuild = await guild.fetch();
+                const members = await fullGuild.members.fetch();
+                console.log(`Synced ${members.size} members from ${fullGuild.name}`);
+                // Process members here
             } catch (error) {
-                console.error(`Failed to fetch members for guild ${guild.name}: ${error.message}`);
-                continue; // Skip to the next guild
-            }
-            for (const [memberId, member] of members) {
-                await collection.updateOne(
-                    { userId: memberId },
-                    { 
-                        $set: { 
-                            userId: memberId,
-                            username: member.user.username,
-                            discriminator: member.user.discriminator,
-                            guildId: guildId
-                        }
-                    },
-                    { upsert: true }
-                );
+                if (error.code === 'NOT_FOUND') {
+                    console.error(`Guild not found or bot doesn't have access: ${guildId}`);
+                } else {
+                    console.error(`Error fetching guild ${guildId}:`, error);
+                }
             }
         }
-        console.log('Server members synced to database');
     } catch (error) {
         console.error('Error syncing server members:', error);
-    } finally {
-        await client.close();
     }
 }
 
