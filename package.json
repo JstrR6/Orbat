@@ -11,10 +11,11 @@
       "bot",
       "discord.js"
     ],
-    "author": "Your Name",
+    "author": "Jstr",
     "license": "MIT",
     "dependencies": {
-      "discord.js": "^14.0.3"
+      "discord.js": "^14.0.3",
+      "dotenv": "^10.0.0"
     }
   }
   
